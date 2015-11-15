@@ -20,6 +20,11 @@ Go Routines
 
 ## Running Commands
 
+Start Redis Server
+```
+redis-server
+```
+
 Go to the chat_app folder
 ```
 cd chat_app
