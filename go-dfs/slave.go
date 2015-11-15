@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,6 +33,12 @@ func Slave(ipAddress string, slaveExit *bool) {
 		os.Exit(1)
 	}
 
+	dirStruct := GetDirStructure()
+	masterMsg := MasterMessage{IpAddress: ipAddress, FilePaths: dirStruct}
+
+	jsonObj, err := json.Marshal(masterMsg)
+	conn.Do("PUBLISH", masterMessageQueue, jsonObj)
+
 }
 
 // RegisterSlave : Used to register slave to redis
@@ -60,18 +67,7 @@ func RegisterSlave(conn redis.Conn, key string, value string) {
 //GetDirStructure : Used to get the directory structure of the shared folder
 func GetDirStructure() []string {
 
-	// workingDir, err := os.Getwd()
-	//
-	// os.Chdir(string(workingDir) + "/../shared/")
-	// if err != nil {
-	// 	fmt.Println("Could not change directory")
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
-
 	currDir, err := os.Getwd()
-	//	dirstruct, err := exec.Command("find", "-follow", "-type", "f").CombinedOutput()
-	//	dirstruct,err:= os.
 	searchDir := string(currDir) + "/../shared/"
 
 	fileList := []string{}
@@ -83,17 +79,11 @@ func GetDirStructure() []string {
 		return nil
 	})
 
-	for _, file := range fileList {
-		fmt.Println(file)
-	}
-
 	if err != nil {
 		fmt.Println("Could not execute find command")
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	//	fmt.Println(string(dirstruct))
 
 	return fileList
 }

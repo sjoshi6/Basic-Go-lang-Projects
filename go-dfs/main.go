@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	redisURL = "redis://152.46.16.250:6379"
+	redisURL           = "redis://152.46.16.250:6379"
+	masterMessageQueue = "master_message"
 )
 
 func main() {
@@ -64,6 +65,10 @@ func main() {
 
 	} else if masterslvToggle == "master" {
 
+		newSlaveChan := make(chan string)
+		fmt.Printf("Master Started at %s \n", ipaddr)
+		go ReceiveMessages(newSlaveChan, ipaddr)
+		go HandleNewSlaves(newSlaveChan)
 		Master()
 
 	} else {
