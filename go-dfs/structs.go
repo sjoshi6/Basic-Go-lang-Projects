@@ -6,3 +6,6 @@ type ReverseIndex struct {
 	AbsolutePath string
 	Destination  string
 }
+
+// Indexs : Array of ReverseIndexes
+type Indexs []ReverseIndex
