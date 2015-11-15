@@ -26,6 +26,10 @@ func CommandLineInput(commandChan chan string, exit *bool) {
 			commandChan <- cmdLine
 			break
 
+		} else if cmdLine == "/dir" {
+
+			commandChan <- cmdLine
+
 		} else {
 
 			fmt.Println("Unrecognized command")
@@ -54,6 +58,9 @@ func CmdHandler(commandChan chan string, exit *bool) {
 			fmt.Println("Setting exit to true")
 			*exit = true
 			return
+		case "/dir":
+			dirStruct := GetDirStructure()
+			fmt.Println(dirStruct)
 
 		default:
 			continue
