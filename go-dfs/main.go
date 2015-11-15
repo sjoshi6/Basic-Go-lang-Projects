@@ -67,9 +67,7 @@ func main() {
 
 		newSlaveChan := make(chan string)
 		fmt.Printf("Master Started at %s \n", ipaddr)
-		go ReceiveMessages(newSlaveChan, ipaddr)
-		go HandleNewSlaves(newSlaveChan)
-		Master()
+		Master(newSlaveChan, ipaddr)
 
 	} else {
 
