@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/soveran/redisurl"
 )
@@ -12,6 +13,9 @@ const (
 )
 
 func main() {
+
+	// Common Variable to manage all processes
+	exit := false
 
 	args := os.Args
 	if len(args) != 2 {
@@ -35,11 +39,28 @@ func main() {
 	// Before function exits close the connection
 	defer managerConn.Close()
 
+	// go Channel for commands common for master and slave
+	commandChan := make(chan string)
+	go CommandLineInput(commandChan, &exit)
+	go CmdHandler(commandChan, &exit)
+
+	// Get Ip Address and key / value for this connection
+	ipaddr := GetIPAddress()
+	key := "online." + ipaddr
+	val := ipaddr + ":8000"
+
 	if masterslvToggle == "slave" {
 
-		ipaddr := GetIPAddress()
-		RegisterSlave(managerConn, ipaddr)
-		Slave()
+		fmt.Printf("New Client Started at %s \n", ipaddr)
+
+		// Register Slave to Redis DB
+		go RegisterSlave(managerConn, key, val)
+
+		// Start the main slave process
+		Slave(ipaddr, &exit)
+
+		// Send Heartbeats
+		go SendHeartBeat(managerConn, key, val, &exit)
 
 	} else if masterslvToggle == "master" {
 		Master()
@@ -47,5 +68,13 @@ func main() {
 		fmt.Println("Incorrect command line argument. Either use master or slave")
 		os.Exit(1)
 	}
+
+	for !exit {
+		time.Sleep(1 * time.Second)
+	}
+
+	// Remove the user before slave function exits
+	managerConn.Do("SREM", "online_slaves", ipaddr)
+	managerConn.Do("DEL", key)
 
 }
