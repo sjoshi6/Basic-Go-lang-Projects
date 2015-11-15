@@ -57,30 +57,26 @@ func RegisterSlave(conn redis.Conn, key string, value string) {
 	}
 }
 
-//GetDirStructure: Used to get the directory structure of the shared folder
+//GetDirStructure : Used to get the directory structure of the shared folder
+func GetDirStructure() string {
 
-func GetDirStructure(conn redis.Conn) {
-	working_dir, err := os.Getwd()
+	workingDir, err := os.Getwd()
 
-	os.Chdir(string(working_dir) + "/../shared/")
+	os.Chdir(string(workingDir) + "/../shared/")
 	if err != nil {
-
+		fmt.Println("Could not change directory")
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	dirstruct, err := exec.Command("find", "-follow", "-type", "f").CombinedOutput()
 	if err != nil {
-
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if err != nil {
-
+		fmt.Println("Could not execute find command")
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	fmt.Println(string(dirstruct))
+
+	return string(dirstruct)
 }

@@ -63,13 +63,17 @@ func main() {
 		go SendHeartBeat(managerConn, key, val, &exit)
 
 	} else if masterslvToggle == "master" {
+
 		Master()
+
 	} else {
+
 		fmt.Println("Incorrect command line argument. Either use master or slave")
 		os.Exit(1)
 	}
 
 	for !exit {
+
 		time.Sleep(1 * time.Second)
 	}
 
