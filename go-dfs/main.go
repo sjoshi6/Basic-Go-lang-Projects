@@ -24,7 +24,7 @@ func main() {
 	fmt.Printf("Mode Selected %s \n", masterslvToggle)
 
 	// Use this connection only for setup activities of the node. No more communication should happen through this
-	managerConn, err := redisurl.ConnectToURL("redis://localhost:6379")
+	managerConn, err := redisurl.ConnectToURL(redisURL)
 	if err != nil {
 
 		fmt.Println(err)
