@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/soveran/redisurl"
 )
 
 const (
@@ -21,7 +23,22 @@ func main() {
 	masterslvToggle := args[1]
 	fmt.Printf("Mode Selected %s \n", masterslvToggle)
 
+	// Use this connection only for setup activities of the node. No more communication should happen through this
+	managerConn, err := redisurl.ConnectToURL("redis://localhost:6379")
+	if err != nil {
+
+		fmt.Println(err)
+		os.Exit(1)
+
+	}
+
+	// Before function exits close the connection
+	defer managerConn.Close()
+
 	if masterslvToggle == "slave" {
+
+		ipaddr := GetIPAddress()
+		RegisterSlave(managerConn, ipaddr)
 		Slave()
 
 	} else if masterslvToggle == "master" {
