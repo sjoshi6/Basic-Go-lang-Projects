@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
@@ -46,4 +47,32 @@ func RegisterSlave(conn redis.Conn, ipAddress string) {
 		os.Exit(1)
 
 	}
+}
+
+//GetDirStructure: Used to get the directory structure of the shared folder
+
+func GetDirStructure(conn redis.Conn) {
+	working_dir, err := os.Getwd()
+
+	os.Chdir(string(working_dir) + "/../shared/")
+	if err != nil {
+
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	dirstruct, err := exec.Command("find", "-follow", "-type", "f").CombinedOutput()
+	if err != nil {
+
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if err != nil {
+
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(string(dirstruct))
 }
