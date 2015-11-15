@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
+	"path/filepath"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
@@ -58,25 +58,42 @@ func RegisterSlave(conn redis.Conn, key string, value string) {
 }
 
 //GetDirStructure : Used to get the directory structure of the shared folder
-func GetDirStructure() string {
+func GetDirStructure() []string {
 
-	workingDir, err := os.Getwd()
+	// workingDir, err := os.Getwd()
+	//
+	// os.Chdir(string(workingDir) + "/../shared/")
+	// if err != nil {
+	// 	fmt.Println("Could not change directory")
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 
-	os.Chdir(string(workingDir) + "/../shared/")
-	if err != nil {
-		fmt.Println("Could not change directory")
-		fmt.Println(err)
-		os.Exit(1)
+	currDir, err := os.Getwd()
+	//	dirstruct, err := exec.Command("find", "-follow", "-type", "f").CombinedOutput()
+	//	dirstruct,err:= os.
+	searchDir := string(currDir) + "/../shared/"
+
+	fileList := []string{}
+	filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+		if !f.IsDir() {
+			fileList = append(fileList, path)
+
+		}
+		return nil
+	})
+
+	for _, file := range fileList {
+		fmt.Println(file)
 	}
 
-	dirstruct, err := exec.Command("find", "-follow", "-type", "f").CombinedOutput()
 	if err != nil {
 		fmt.Println("Could not execute find command")
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	fmt.Println(string(dirstruct))
+	//	fmt.Println(string(dirstruct))
 
-	return string(dirstruct)
+	return fileList
 }

@@ -60,8 +60,9 @@ func CmdHandler(commandChan chan string, exit *bool) {
 			return
 		case "/dir":
 			dirStruct := GetDirStructure()
-			fmt.Println(dirStruct)
-
+			for _, path := range dirStruct {
+				fmt.Println(path)
+			}
 		default:
 			continue
 		}
