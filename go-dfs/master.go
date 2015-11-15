@@ -19,7 +19,7 @@ func Master(newSlaveChannel chan string, ipAddress string) {
 		os.Exit(1)
 	}
 	go ReceiveMessages(newSlaveChannel, ipAddress)
-	go HandleNewSlaves(conn, newSlaveChannel)
+	go HandleNewSlaves(newSlaveChannel)
 	// Close only when function exits
 	defer conn.Close()
 }
@@ -58,7 +58,7 @@ func ReceiveMessages(newSlaveChannel chan string, ipAddress string) {
 }
 
 // HandleNewSlaves : handles new slave start dir structure
-func HandleNewSlaves(conn redis.Conn, newSlaveChannel chan string) {
+func HandleNewSlaves(newSlaveChannel chan string) {
 
 	for {
 		newSlave := <-newSlaveChannel
@@ -71,25 +71,33 @@ func HandleNewSlaves(conn redis.Conn, newSlaveChannel chan string) {
 			fmt.Println(err)
 		}
 		fmt.Printf("%+v", masterMsg)
-		CreateFileMapping(conn, masterMsg)
+		CreateFileMapping(masterMsg)
 
 	}
 }
 
 //CreateFileMapping : Creates a mapping of file addresses
-func CreateFileMapping(conn redis.Conn, masterMsg MasterMessage) {
+func CreateFileMapping(masterMsg MasterMessage) {
+	conn, err := redisurl.ConnectToURL(redisURL)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	var revIndex ReverseIndex
+
 	for _, filepath := range masterMsg.FilePaths {
 		index := strings.Index(filepath, "shared")
 		filestart := index + 6
 		relPath := filepath[filestart:]
 		revIndex.AbsolutePath = filepath
 		revIndex.Destination = masterMsg.IpAddress
-
+		fmt.Println(relPath)
 		jsonObj, err := json.Marshal(revIndex)
 		if err != nil {
 			fmt.Println("Unable to marshal json")
 		}
-		conn.Do("SET", relPath, jsonObj)
+		fmt.Println(jsonObj)
+		conn.Do("SET", relPath, string(jsonObj), "NX")
 	}
+	defer conn.Close()
 }
