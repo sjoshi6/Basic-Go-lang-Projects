@@ -9,7 +9,7 @@ import (
 )
 
 // Slave : Contains go code for master
-func Slave() {
+func Slave(ipAddress string, slaveExit *bool) {
 
 	conn, err := redisurl.ConnectToURL(redisURL)
 	if err != nil {
@@ -20,13 +20,21 @@ func Slave() {
 	// Close only when function exits
 	defer conn.Close()
 
+	// Add the slave to redis list
+	val, err := conn.Do("SADD", "online_slaves", ipAddress)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if val == nil {
+		fmt.Println("Insert error")
+		os.Exit(1)
+	}
+
 }
 
 // RegisterSlave : Used to register slave to redis
-func RegisterSlave(conn redis.Conn, ipAddress string) {
-
-	key := "online." + ipAddress
-	value := ipAddress + ":8000"
+func RegisterSlave(conn redis.Conn, key string, value string) {
 
 	// Register slave to redis
 	val, err := conn.Do("SET", key, value, "NX", "EX", "100")

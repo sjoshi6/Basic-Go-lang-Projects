@@ -1,6 +1,13 @@
 package main
 
-import "net"
+import (
+	"fmt"
+	"net"
+	"os"
+	"time"
+
+	"github.com/garyburd/redigo/redis"
+)
 
 // GetIPAddress : Used to get IP of the running machine
 func GetIPAddress() string {
@@ -30,4 +37,25 @@ func GetIPAddress() string {
 	}
 
 	return ""
+}
+
+//SendHeartBeat : Keeps user session alive
+func SendHeartBeat(conn redis.Conn, key string, val string, slaveExit *bool) {
+
+	// Continue sending heartbeats until chat exit is not called
+	for !*slaveExit {
+		// Here user is expected to exist
+		_, err := conn.Do("SET", key, val, "XX", "EX", "100")
+
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Heart beat not accecpted")
+			os.Exit(1)
+		}
+
+		// Send heartbeat every 80 seconds to avoid expiry
+		time.Sleep(80 * time.Second)
+
+	}
+
 }
