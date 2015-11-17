@@ -19,14 +19,20 @@ func main() {
 	exit := false
 
 	args := os.Args
-	if len(args) != 2 {
-		fmt.Println("Usage: main.go <master/slave>")
+	if len(args) < 2 {
+		fmt.Println("Usage: main.go <master/slave/client>")
 		os.Exit(1)
 	}
 
 	// Capturing which mode to launch go server in
-	masterslvToggle := args[1]
-	fmt.Printf("Mode Selected %s \n", masterslvToggle)
+	mode := args[1]
+	fmt.Printf("Mode Selected %s \n", mode)
+
+	// Manage name of user
+	username := "test"
+	if len(args) == 3 {
+		username = args[2]
+	}
 
 	// Use this connection only for setup activities of the node. No more communication should happen through this
 	managerConn, err := redisurl.ConnectToURL(redisURL)
@@ -42,15 +48,16 @@ func main() {
 
 	// go Channel for commands common for master and slave
 	commandChan := make(chan string)
-	go CommandLineInput(commandChan, &exit)
-	go CmdHandler(commandChan, &exit)
 
 	// Get Ip Address and key / value for this connection
 	ipaddr := GetIPAddress()
 	key := "online." + ipaddr
 	val := ipaddr + ":8000"
 
-	if masterslvToggle == "slave" {
+	if mode == "slave" {
+
+		go CommandLineInput(commandChan, &exit)
+		go CmdHandler(commandChan, &exit)
 
 		fmt.Printf("New Client Started at %s \n", ipaddr)
 
@@ -63,11 +70,18 @@ func main() {
 		// Send Heartbeats
 		go SendHeartBeat(managerConn, key, val, &exit)
 
-	} else if masterslvToggle == "master" {
+	} else if mode == "master" {
+
+		go CommandLineInput(commandChan, &exit)
+		go CmdHandler(commandChan, &exit)
 
 		newSlaveChan := make(chan string)
 		fmt.Printf("Master Started at %s \n", ipaddr)
 		Master(newSlaveChan, ipaddr)
+
+	} else if mode == "client" {
+
+		go FileSystemCommandHandler(&exit, username)
 
 	} else {
 

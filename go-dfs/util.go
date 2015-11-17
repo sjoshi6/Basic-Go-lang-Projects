@@ -59,3 +59,13 @@ func SendHeartBeat(conn redis.Conn, key string, val string, slaveExit *bool) {
 	}
 
 }
+
+// SliceContains : Used to check if a value exists in an array slice
+func SliceContains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
