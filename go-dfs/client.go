@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
 )
 
@@ -71,91 +70,25 @@ func FileSystemCommandHandler(exit *bool, username string) {
 
 			case "ls":
 
-				files, _ := redis.Strings(conn.Do("KEYS", "*"))
-				baseDirEndIndex := len(currDir)
-				dirArr := []string{}
-				fileArr := []string{}
-
-				for _, file := range files {
-					if strings.Index(file, currDir) == 0 {
-						relpath := file[baseDirEndIndex:]
-						fileordir := strings.Index(relpath, "/")
-
-						if fileordir == -1 {
-
-							fileArr = append(fileArr, relpath)
-
-						} else {
-
-							path := relpath[:fileordir+1]
-
-							if !SliceContains(dirArr, path) {
-								dirArr = append(dirArr, path)
-							}
-
-						}
-
-					}
-				}
-
-				// Print the dirs found
-				for _, dirname := range dirArr {
-
-					fmt.Printf("dir \t--\t %s\n", dirname)
-				}
-
-				//Print the files found
-				for _, filename := range fileArr {
-
-					fmt.Printf("file \t--\t %s\n", filename)
-				}
-
+				LSHandler(conn, currDir)
 				break
 
 			case "cd basedir":
 
-				currDir = fixedBaseDir
+				currDir = CdHandler(conn, "basedir", currDir, "")
 				fmt.Printf("Moved to dir: %s \n", currDir)
 				break
 
 			case "cd back":
 
-				if currDir == "/" {
-
-					fmt.Println("Already at root.")
-
-				} else {
-
-					lastSlashIndx := strings.LastIndex(currDir, "/")
-					secondlastIndx := strings.LastIndex(currDir[:lastSlashIndx], "/")
-					currDir = currDir[:secondlastIndx+1]
-					fmt.Printf("Moved to dir: %s \n", currDir)
-				}
+				currDir = CdHandler(conn, "back", currDir, "")
 
 				break
 
 			case "cd":
 
-				intendedDir := currDir + dir + "/"
-				files, _ := redis.Strings(conn.Do("KEYS", "*"))
-				found := false
-				for _, file := range files {
-
-					if strings.Index(file, intendedDir) == 0 {
-
-						currDir = intendedDir
-						fmt.Printf("Moved to dir: %s \n", currDir)
-						found = true
-						dir = ""
-						break
-					}
-				}
-
-				if found == false {
-
-					fmt.Println("Requested directory could not be found")
-
-				}
+				currDir = CdHandler(conn, "normal", currDir, dir)
+				dir = ""
 				break
 
 			case "exit":

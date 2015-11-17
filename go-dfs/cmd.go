@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
+
+	"github.com/garyburd/redigo/redis"
 )
 
 // CommandLineInput : Take Inputs from command line
@@ -68,4 +71,99 @@ func CmdHandler(commandChan chan string, exit *bool) {
 		}
 
 	}
+}
+
+// CdHandler :  handler for cd function
+func CdHandler(conn redis.Conn, cmdtype string, currDir string, dirName string) string {
+
+	switch cmdtype {
+	case "basedir":
+		return fixedBaseDir
+
+	case "back":
+
+		if currDir == "/" {
+
+			fmt.Println("Already at root.")
+			return currDir
+
+		}
+
+		lastSlashIndx := strings.LastIndex(currDir, "/")
+		secondlastIndx := strings.LastIndex(currDir[:lastSlashIndx], "/")
+		currDir = currDir[:secondlastIndx+1]
+		fmt.Printf("Moved to dir: %s \n", currDir)
+		return currDir
+
+	case "normal":
+
+		intendedDir := currDir + dirName + "/"
+		files, _ := redis.Strings(conn.Do("KEYS", "*"))
+		found := false
+		for _, file := range files {
+
+			if strings.Index(file, intendedDir) == 0 {
+
+				currDir = intendedDir
+				fmt.Printf("Moved to dir: %s \n", currDir)
+				found = true
+				dirName = ""
+				break
+			}
+		}
+
+		if found == false {
+
+			fmt.Println("Requested directory could not be found")
+		}
+		return currDir
+
+	default:
+		return currDir
+	}
+
+}
+
+// LSHandler : Handler for the LS command
+func LSHandler(conn redis.Conn, currDir string) {
+
+	files, _ := redis.Strings(conn.Do("KEYS", "*"))
+	baseDirEndIndex := len(currDir)
+	dirArr := []string{}
+	fileArr := []string{}
+
+	for _, file := range files {
+		if strings.Index(file, currDir) == 0 {
+			relpath := file[baseDirEndIndex:]
+			fileordir := strings.Index(relpath, "/")
+
+			if fileordir == -1 {
+
+				fileArr = append(fileArr, relpath)
+
+			} else {
+
+				path := relpath[:fileordir+1]
+
+				if !SliceContains(dirArr, path) {
+					dirArr = append(dirArr, path)
+				}
+
+			}
+
+		}
+	}
+
+	// Print the dirs found
+	for _, dirname := range dirArr {
+
+		fmt.Printf("dir \t--\t %s\n", dirname)
+	}
+
+	//Print the files found
+	for _, filename := range fileArr {
+
+		fmt.Printf("file \t--\t %s\n", filename)
+	}
+
 }
