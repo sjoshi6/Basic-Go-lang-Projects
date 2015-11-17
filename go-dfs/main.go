@@ -20,7 +20,7 @@ func main() {
 
 	args := os.Args
 	if len(args) < 2 {
-		fmt.Println("Usage: main.go <master/slave/client>")
+		fmt.Println("Usage: main.go <master/slave/client/api-server>")
 		os.Exit(1)
 	}
 
@@ -54,7 +54,8 @@ func main() {
 	key := "online." + ipaddr
 	val := ipaddr + ":8000"
 
-	if mode == "slave" {
+	switch mode {
+	case "slave":
 
 		go CommandLineInput(commandChan, &exit)
 		go CmdHandler(commandChan, &exit)
@@ -70,7 +71,7 @@ func main() {
 		// Send Heartbeats
 		go SendHeartBeat(managerConn, key, val, &exit)
 
-	} else if mode == "master" {
+	case "master":
 
 		go CommandLineInput(commandChan, &exit)
 		go CmdHandler(commandChan, &exit)
@@ -79,14 +80,21 @@ func main() {
 		fmt.Printf("Master Started at %s \n", ipaddr)
 		Master(newSlaveChan, ipaddr)
 
-	} else if mode == "client" {
+	case "client":
 
 		go FileSystemCommandHandler(&exit, username)
 
-	} else {
+	case "api-server":
+
+		go CommandLineInput(commandChan, &exit)
+		go CmdHandler(commandChan, &exit)
+		go StartServer(&exit)
+
+	default:
 
 		fmt.Println("Incorrect command line argument. Either use master or slave")
 		os.Exit(1)
+
 	}
 
 	for !exit {
