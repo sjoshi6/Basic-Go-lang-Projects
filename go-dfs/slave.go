@@ -8,6 +8,8 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
@@ -123,10 +125,34 @@ func handleConnection(conn net.Conn) {
 	fmt.Print("Command Received:", string(message))
 
 	// Extract filename and read its content
-	//fileName := strings.Split(string(message), " ")[1]
-
+	absPath := strings.Split(string(message), " ")[1]
+	absPathcnt := utf8.RuneCountInString(absPath)
+	fileName := absPath[:absPathcnt-1]
+	// index := strings.LastIndex(absPath, "/")
+	// workingDir := absPath[:index]
+	//
+	// fileName := absPath[index+1:]
+	// //fileName = string(fileName)
+	// file1cnt := utf8.RuneCountInString(fileName)
+	// fileName = fileName[:file1cnt-1]
+	// fmt.Println("filename:", file1cnt)
+	// fileName2 := "test2.txt"
+	// file2cnt := utf8.RuneCountInString(fileName2)
+	// fmt.Println("filename2:", file2cnt)
+	// cmp := strings.Contains(fileName, "test1.txt")
+	// fmt.Println("Comparison: ", cmp)
+	// os.Chdir(workingDir)
+	// wd, _ := os.Getwd()
+	// fmt.Println("workingDir: ", wd)
 	//fullpath := sharedDir + fileName
-	data, err := ioutil.ReadFile("test.txt")
+	// fmt.Println(os.Getwd())
+	// os.Chdir("../shared/")
+	// workingDir, _ := os.Getwd()
+	// fmt.Println(fileName)
+	// path := workingDir + fileName
+	// fmt.Println("Path: ", path)
+	//fileName := "test/sau.txt"
+	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		fmt.Println(err)
 	}
