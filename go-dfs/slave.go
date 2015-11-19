@@ -1,14 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net"
 	"os"
 	"path/filepath"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
 )
+
+var fileDir, _ = os.Getwd()
+var sharedDir = string(fileDir) + "/../shared/"
 
 // Slave : Contains go code for master
 func Slave(ipAddress string, slaveExit *bool) {
@@ -86,4 +92,46 @@ func GetDirStructure() []string {
 	}
 
 	return fileList
+}
+
+// StartFileServer : Used to start file server at slave
+func StartFileServer() {
+
+	fmt.Println("Started File Server")
+	ln, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		// handle error
+	}
+
+	defer ln.Close()
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			// handle error
+		}
+		go handleConnection(conn)
+	}
+
+}
+
+func handleConnection(conn net.Conn) {
+	// will listen for message to process ending in newline (\n)
+	message, _ := bufio.NewReader(conn).ReadString('\n')
+
+	// output message received
+	fmt.Print("Command Received:", string(message))
+
+	// Extract filename and read its content
+	//fileName := strings.Split(string(message), " ")[1]
+
+	//fullpath := sharedDir + fileName
+	data, err := ioutil.ReadFile("test.txt")
+	if err != nil {
+		fmt.Println(err)
+	}
+	// Send contents to client
+	conn.Write([]byte(string(data) + "\n"))
+	conn.Close()
+
 }

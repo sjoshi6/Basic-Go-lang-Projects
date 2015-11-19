@@ -57,6 +57,7 @@ func main() {
 	switch mode {
 	case "slave":
 
+		// Start command line driver
 		go CommandLineInput(commandChan, &exit)
 		go CmdHandler(commandChan, &exit)
 
@@ -64,6 +65,9 @@ func main() {
 
 		// Register Slave to Redis DB
 		go RegisterSlave(managerConn, key, val)
+
+		// Start File Server
+		go StartFileServer()
 
 		// Start the main slave process
 		Slave(ipaddr, &exit)

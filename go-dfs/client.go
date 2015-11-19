@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net"
 	"os"
 	"regexp"
 	"strings"
@@ -95,6 +96,19 @@ func FileSystemCommandHandler(exit *bool, username string) {
 
 				fmt.Println("Program exiting")
 				*exit = true
+
+			case "cat":
+				fmt.Println("Executing cat command")
+				tcpconn, er := net.Dial("tcp", "192.168.0.6:8080")
+				if er != nil {
+					fmt.Print("No tcpcon found")
+				}
+				// send to socket
+				fmt.Fprintf(tcpconn, "cat test/sau.txt\n")
+
+				// Receive text from server
+				message, _ := bufio.NewReader(tcpconn).ReadString('\n')
+				fmt.Println(message)
 
 			default:
 				fmt.Println("Unrecognized command")
