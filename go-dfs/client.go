@@ -99,12 +99,19 @@ func FileSystemCommandHandler(exit *bool, username string) {
 
 			case "cat":
 				fmt.Println("Executing cat command")
+				mastertcpconn, err := net.Dial("tcp", "192.168.0.18:5000")
+				if err != nil {
+					fmt.Print("No master tcpcon found")
+				}
+				// send to socket
+				fmt.Fprintf(mastertcpconn, "cat /test1.txt\n")
+				masterReply, _ := bufio.NewReader(mastertcpconn).ReadString('\n')
+				fmt.Println(masterReply)
+
 				tcpconn, er := net.Dial("tcp", "10.139.67.64:8080")
 				if er != nil {
 					fmt.Print("No tcpcon found")
 				}
-				// send to socket
-				fmt.Fprintf(tcpconn, "cat /home/sarvesh/goworkspace/shared/test1.txt\n")
 
 				// Receive text from server
 				message, _ := bufio.NewReader(tcpconn).ReadString('\n')

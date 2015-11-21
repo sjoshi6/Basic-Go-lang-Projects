@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
@@ -20,6 +23,7 @@ func Master(newSlaveChannel chan string, ipAddress string) {
 	}
 	go ReceiveMessages(newSlaveChannel, ipAddress)
 	go HandleNewSlaves(newSlaveChannel)
+	go GetFileIP(conn)
 	// Close only when function exits
 	defer conn.Close()
 }
@@ -87,7 +91,7 @@ func CreateFileMapping(masterMsg MasterMessage) {
 
 	for _, filepath := range masterMsg.FilePaths {
 		index := strings.Index(filepath, "shared")
-		filestart := index + 6
+		filestart := index + 5
 		relPath := filepath[filestart:]
 		revIndex.AbsolutePath = filepath
 		revIndex.Destination = masterMsg.IpAddress
@@ -96,8 +100,57 @@ func CreateFileMapping(masterMsg MasterMessage) {
 		if err != nil {
 			fmt.Println("Unable to marshal json")
 		}
-		fmt.Println(jsonObj)
+		//fmt.Println(jsonObj)
 		conn.Do("SET", relPath, string(jsonObj), "NX")
 	}
 	defer conn.Close()
+}
+
+//GetFileIP :  Return File Destination IP and Absolute Path
+func GetFileIP(redisconn redis.Conn) {
+	// will listen for message to process ending in newline (\n)
+	fmt.Println("Starting master server")
+	ln, err := net.Listen("tcp", ":5000")
+	if err != nil {
+		// handle error
+	}
+
+	defer ln.Close()
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			// handle error
+		}
+		go handleMasterConnection(conn, redisconn)
+	}
+
+}
+
+func handleMasterConnection(conn net.Conn, redisconn redis.Conn) {
+
+	message, _ := bufio.NewReader(conn).ReadString('\n')
+
+	// output message received
+	fmt.Print("Command Received:", string(message))
+
+	// Extract filename and read its content
+	relPath := strings.Split(string(message), " ")[1]
+	relPathcnt := utf8.RuneCountInString(relPath)
+	//index := strings.LastIndex(absPath, "/")
+	fileName := relPath[:relPathcnt-1]
+	fmt.Println(fileName)
+	jsonString, _ := redisconn.Do("GET", fileName)
+	//jsonObj := []byte(jsonString)
+	fmt.Println(jsonString)
+
+	//var dat map[string]interface{}
+
+	//json.Unmarshal(jsonString, &dat)
+	//ipAdress := jsonString["Destination"].(string)
+	// absPath := dat["AbsolutePath"].(string)
+	// Send contents to client
+	//conn.Write([]byte("ipAdress:" + ipAdress + "absPath:" + absPath + "\n"))
+	conn.Close()
+
 }
