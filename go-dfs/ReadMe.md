@@ -23,9 +23,10 @@ Output:
 Mode Selected client
 File System commands Available...
 saurabh-cmd-prompt $:  ls
-dir 	--	 test/
-file 	--	 b.txt
-file 	--	 a.txt
+dir 	--	 /test/
+file 	--	 /b.txt
+file 	--	 /a.txt
+file  --   /test2.txt
 
 saurabh-cmd-prompt $:  cd test
 Moved to dir: /test/
@@ -40,7 +41,14 @@ Moved to dir: /
 saurabh-cmd-prompt $:  cd ..
 Already at root.
 
+saurabh-cmd-prompt $:  cat /test2.txt
+Dev:
+
+Sau
+Sarv
+
 saurabh-cmd-prompt $:  exit
 Program exiting
+
 ```
 
