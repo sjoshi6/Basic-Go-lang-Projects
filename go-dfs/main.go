@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/soveran/redisurl"
@@ -12,6 +13,8 @@ const (
 	redisURL           = "redis://152.46.16.250:6379"
 	masterMessageQueue = "master_message"
 )
+
+var wg sync.WaitGroup
 
 func main() {
 
@@ -82,7 +85,13 @@ func main() {
 
 		newSlaveChan := make(chan string)
 		fmt.Printf("Master Started at %s \n", ipaddr)
-		Master(newSlaveChan, ipaddr)
+		go ReceiveMessages(newSlaveChan, ipaddr)
+		go HandleNewSlaves(newSlaveChan)
+		go GetFileIPServer()
+
+		for !exit {
+			time.Sleep(1 * time.Second)
+		}
 
 	case "client":
 

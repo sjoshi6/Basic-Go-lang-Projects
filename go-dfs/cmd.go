@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 
@@ -157,13 +159,60 @@ func LSHandler(conn redis.Conn, currDir string) {
 	// Print the dirs found
 	for _, dirname := range dirArr {
 
-		fmt.Printf("dir \t--\t %s\n", dirname)
+		fmt.Printf("dir \t--\t %s\n", "/"+dirname)
 	}
 
 	//Print the files found
 	for _, filename := range fileArr {
 
-		fmt.Printf("file \t--\t %s\n", filename)
+		fmt.Printf("file \t--\t %s\n", "/"+filename)
 	}
+
+}
+
+// HandleCat : Used to handle file cat commands
+func HandleCat(cmdFile string) string {
+
+	// Connect to master to get file Info
+	mastertcpconn, err := net.Dial("tcp", ":5000")
+	if err != nil {
+		fmt.Print("No master tcpcon found")
+	}
+
+	// Send to master file server
+	fmt.Fprintf(mastertcpconn, cmdFile+"\n")
+	masterReply, _ := bufio.NewReader(mastertcpconn).ReadString('\n')
+
+	// Unbox the received marshalled JSON
+	var revIndex ReverseIndex
+	unmarshallErr := json.Unmarshal([]byte(masterReply), &revIndex)
+
+	if unmarshallErr != nil {
+		fmt.Println(unmarshallErr)
+	}
+
+	// Print the received object
+	fmt.Printf("\n%+v", revIndex)
+
+	// Extract destination and full path
+	destination := revIndex.Destination
+	fullPath := revIndex.AbsolutePath
+
+	// After Slave IP is found use this
+	fmt.Println("Slave IP is found " + destination)
+
+	// Connect to this slave to get cat data
+	tcpconn, er := net.Dial("tcp", destination+":8080")
+	if er != nil {
+		fmt.Print("No tcpcon found")
+	}
+
+	// Read content from slave
+	cmd := "cat " + fullPath + "\n"
+	fmt.Fprintf(tcpconn, cmd)
+
+	// Receive text from server
+	message, _ := bufio.NewReader(tcpconn).ReadBytes('\t')
+	return string(message)
 
 }

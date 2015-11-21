@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"net"
 	"os"
 	"regexp"
 	"strings"
@@ -42,6 +41,18 @@ func FileSystemCommandHandler(exit *bool, username string) {
 			// command issued as a string
 			cmdLine := string(line)
 
+			// --------------- Pre Hanlder for cat command ----------- //
+
+			cmdFile := ""
+
+			if strings.Index(cmdLine, "cat") == 0 {
+
+				cmdFile = strings.Split(cmdLine, " ")[1]
+				cmdLine = "cat"
+
+			}
+
+			//--------------- Pre handlers for cd commands ------------ //
 			dir := "" // Needs to be outside loop
 
 			if cmdLine == "cd /" {
@@ -98,24 +109,9 @@ func FileSystemCommandHandler(exit *bool, username string) {
 				*exit = true
 
 			case "cat":
-				fmt.Println("Executing cat command")
-				mastertcpconn, err := net.Dial("tcp", "192.168.0.18:5000")
-				if err != nil {
-					fmt.Print("No master tcpcon found")
-				}
-				// send to socket
-				fmt.Fprintf(mastertcpconn, "cat /test1.txt\n")
-				masterReply, _ := bufio.NewReader(mastertcpconn).ReadString('\n')
-				fmt.Println(masterReply)
 
-				tcpconn, er := net.Dial("tcp", "10.139.67.64:8080")
-				if er != nil {
-					fmt.Print("No tcpcon found")
-				}
-
-				// Receive text from server
-				message, _ := bufio.NewReader(tcpconn).ReadString('\n')
-				fmt.Println(message)
+				data := HandleCat(cmdFile)
+				fmt.Println(data)
 
 			default:
 				fmt.Println("Unrecognized command")

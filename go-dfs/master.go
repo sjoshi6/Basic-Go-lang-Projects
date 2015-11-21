@@ -7,26 +7,10 @@ import (
 	"net"
 	"os"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/soveran/redisurl"
 )
-
-// Master : Contains go code for master
-func Master(newSlaveChannel chan string, ipAddress string) {
-
-	conn, err := redisurl.ConnectToURL(redisURL)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	go ReceiveMessages(newSlaveChannel, ipAddress)
-	go HandleNewSlaves(newSlaveChannel)
-	go GetFileIP(conn)
-	// Close only when function exits
-	defer conn.Close()
-}
 
 // ReceiveMessages : Receive messages fron master_messages redis channel
 func ReceiveMessages(newSlaveChannel chan string, ipAddress string) {
@@ -91,28 +75,32 @@ func CreateFileMapping(masterMsg MasterMessage) {
 
 	for _, filepath := range masterMsg.FilePaths {
 		index := strings.Index(filepath, "shared")
-		filestart := index + 5
+		filestart := index + 6
 		relPath := filepath[filestart:]
 		revIndex.AbsolutePath = filepath
 		revIndex.Destination = masterMsg.IpAddress
-		fmt.Println(relPath)
+
 		jsonObj, err := json.Marshal(revIndex)
 		if err != nil {
 			fmt.Println("Unable to marshal json")
 		}
-		//fmt.Println(jsonObj)
-		conn.Do("SET", relPath, string(jsonObj), "NX")
+
+		// Insert the reverse Index in Redis
+		conn.Do("SET", relPath, string(jsonObj))
 	}
-	defer conn.Close()
+
+	conn.Close()
 }
 
-//GetFileIP :  Return File Destination IP and Absolute Path
-func GetFileIP(redisconn redis.Conn) {
-	// will listen for message to process ending in newline (\n)
-	fmt.Println("Starting master server")
+//GetFileIPServer :  Return File Destination IP and Absolute Path
+func GetFileIPServer() {
+
+	fmt.Println("Starting master IP getter server")
 	ln, err := net.Listen("tcp", ":5000")
+
 	if err != nil {
-		// handle error
+
+		fmt.Println(err)
 	}
 
 	defer ln.Close()
@@ -120,37 +108,50 @@ func GetFileIP(redisconn redis.Conn) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			// handle error
+
+			fmt.Println(err)
 		}
-		go handleMasterConnection(conn, redisconn)
+
+		go handleMasterConnection(conn)
 	}
 
 }
 
-func handleMasterConnection(conn net.Conn, redisconn redis.Conn) {
+func handleMasterConnection(conn net.Conn) {
 
 	message, _ := bufio.NewReader(conn).ReadString('\n')
 
+	msg := message[:len(message)-1]
 	// output message received
-	fmt.Print("Command Received:", string(message))
+	fmt.Print("Command Received:", string(msg))
 
 	// Extract filename and read its content
-	relPath := strings.Split(string(message), " ")[1]
-	relPathcnt := utf8.RuneCountInString(relPath)
-	//index := strings.LastIndex(absPath, "/")
-	fileName := relPath[:relPathcnt-1]
-	fmt.Println(fileName)
-	jsonString, _ := redisconn.Do("GET", fileName)
-	//jsonObj := []byte(jsonString)
-	fmt.Println(jsonString)
+	relPath := string(msg)
 
-	//var dat map[string]interface{}
+	redisconn, err := redisurl.ConnectToURL(redisURL)
+	if err != nil {
 
-	//json.Unmarshal(jsonString, &dat)
-	//ipAdress := jsonString["Destination"].(string)
-	// absPath := dat["AbsolutePath"].(string)
+		fmt.Println(err)
+	}
+
+	defer redisconn.Close()
+
+	// JSON Obj Values are received as bytes and translated to structs
+	val, _ := redis.Bytes(redisconn.Do("GET", relPath))
+
+	var revIndex ReverseIndex
+	unmarshallErr := json.Unmarshal(val, &revIndex)
+
+	if unmarshallErr != nil {
+		fmt.Println(unmarshallErr)
+	}
+
+	fmt.Printf("\n %+v \n", revIndex)
+
+	bytesJSON, _ := json.Marshal(revIndex)
+	strJSON := string(bytesJSON) + "\n"
 	// Send contents to client
-	//conn.Write([]byte("ipAdress:" + ipAdress + "absPath:" + absPath + "\n"))
+	conn.Write([]byte(strJSON))
 	conn.Close()
 
 }

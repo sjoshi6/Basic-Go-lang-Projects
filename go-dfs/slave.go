@@ -134,7 +134,7 @@ func handleConnection(conn net.Conn) {
 		fmt.Println(err)
 	}
 	// Send contents to client
-	conn.Write([]byte(string(data) + "\n"))
+	conn.Write([]byte(string(data) + "\t"))
 	conn.Close()
 
 }
