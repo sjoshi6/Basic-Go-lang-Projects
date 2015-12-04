@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"go-dfs/api"
+	"go-dfs/components"
+	"go-dfs/util"
 	"os"
 	"sync"
 	"time"
@@ -53,7 +56,7 @@ func main() {
 	commandChan := make(chan string)
 
 	// Get Ip Address and key / value for this connection
-	ipaddr := GetIPAddress()
+	ipaddr := util.GetIPAddress()
 	key := "online." + ipaddr
 	val := ipaddr + ":8000"
 
@@ -61,33 +64,33 @@ func main() {
 	case "slave":
 
 		// Start command line driver
-		go CommandLineInput(commandChan, &exit)
-		go CmdHandler(commandChan, &exit)
+		go components.CommandLineInput(commandChan, &exit)
+		go components.CmdHandler(commandChan, &exit)
 
 		fmt.Printf("New Client Started at %s \n", ipaddr)
 
 		// Register Slave to Redis DB
-		go RegisterSlave(managerConn, key, val)
+		go components.RegisterSlave(managerConn, key, val)
 
 		// Start File Server
-		go StartFileServer()
+		go components.StartFileServer()
 
 		// Start the main slave process
-		Slave(ipaddr, &exit)
+		components.Slave(ipaddr, &exit)
 
 		// Send Heartbeats
-		go SendHeartBeat(managerConn, key, val, &exit)
+		go util.SendHeartBeat(managerConn, key, val, &exit)
 
 	case "master":
 
-		go CommandLineInput(commandChan, &exit)
-		go CmdHandler(commandChan, &exit)
+		go components.CommandLineInput(commandChan, &exit)
+		go components.CmdHandler(commandChan, &exit)
 
 		newSlaveChan := make(chan string)
 		fmt.Printf("Master Started at %s \n", ipaddr)
-		go ReceiveMessages(newSlaveChan, ipaddr)
-		go HandleNewSlaves(newSlaveChan)
-		go GetFileIPServer()
+		go components.ReceiveMessages(newSlaveChan, ipaddr)
+		go components.HandleNewSlaves(newSlaveChan)
+		go components.GetFileIPServer()
 
 		for !exit {
 			time.Sleep(1 * time.Second)
@@ -95,13 +98,13 @@ func main() {
 
 	case "client":
 
-		go FileSystemCommandHandler(&exit, username)
+		go components.FileSystemCommandHandler(&exit, username)
 
 	case "api-server":
 
-		go CommandLineInput(commandChan, &exit)
-		go CmdHandler(commandChan, &exit)
-		go StartServer(&exit)
+		go components.CommandLineInput(commandChan, &exit)
+		go components.CmdHandler(commandChan, &exit)
+		go api.StartServer(&exit)
 
 	default:
 

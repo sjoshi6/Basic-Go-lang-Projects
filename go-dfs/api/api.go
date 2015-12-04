@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"log"
@@ -6,6 +6,11 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+)
+
+const (
+	redisURL           = "redis://152.46.16.250:6379"
+	masterMessageQueue = "master_message"
 )
 
 // Add new routes here

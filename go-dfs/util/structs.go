@@ -1,4 +1,4 @@
-package main
+package util
 
 // ReverseIndex : Used to store Reverse Index information in Redis
 // Useful for marshal and unmarshalling

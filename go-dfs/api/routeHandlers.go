@@ -1,7 +1,8 @@
-package main
+package api
 
 import (
 	"fmt"
+	"go-dfs/util"
 	"net/http"
 	"strings"
 
@@ -40,7 +41,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 
 				path := relpath[:fileordir+1]
 
-				if !SliceContains(dirArr, path) {
+				if !util.SliceContains(dirArr, path) {
 					dirArr = append(dirArr, path)
 				}
 

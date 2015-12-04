@@ -1,9 +1,10 @@
-package main
+package components
 
 import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"go-dfs/util"
 	"net"
 	"os"
 	"strings"
@@ -147,7 +148,7 @@ func LSHandler(conn redis.Conn, currDir string) {
 
 				path := relpath[:fileordir+1]
 
-				if !SliceContains(dirArr, path) {
+				if !util.SliceContains(dirArr, path) {
 					dirArr = append(dirArr, path)
 				}
 
@@ -184,7 +185,7 @@ func HandleCat(cmdFile string) string {
 	masterReply, _ := bufio.NewReader(mastertcpconn).ReadString('\n')
 
 	// Unbox the received marshalled JSON
-	var revIndex ReverseIndex
+	var revIndex util.ReverseIndex
 	unmarshallErr := json.Unmarshal([]byte(masterReply), &revIndex)
 
 	if unmarshallErr != nil {

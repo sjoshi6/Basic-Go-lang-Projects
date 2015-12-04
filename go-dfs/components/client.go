@@ -1,4 +1,4 @@
-package main
+package components
 
 import (
 	"bufio"
@@ -11,7 +11,9 @@ import (
 )
 
 const (
-	fixedBaseDir = "/"
+	fixedBaseDir       = "/"
+	redisURL           = "redis://152.46.16.250:6379"
+	masterMessageQueue = "master_message"
 )
 
 // FileSystemCommandHandler : Manages commands issued by the client

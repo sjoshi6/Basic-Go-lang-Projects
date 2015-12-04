@@ -1,9 +1,10 @@
-package main
+package components
 
 import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"go-dfs/util"
 	"net"
 	"os"
 	"strings"
@@ -71,7 +72,7 @@ func CreateFileMapping(masterMsg MasterMessage) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var revIndex ReverseIndex
+	var revIndex util.ReverseIndex
 
 	for _, filepath := range masterMsg.FilePaths {
 		index := strings.Index(filepath, "shared")
@@ -139,7 +140,7 @@ func handleMasterConnection(conn net.Conn) {
 	// JSON Obj Values are received as bytes and translated to structs
 	val, _ := redis.Bytes(redisconn.Do("GET", relPath))
 
-	var revIndex ReverseIndex
+	var revIndex util.ReverseIndex
 	unmarshallErr := json.Unmarshal(val, &revIndex)
 
 	if unmarshallErr != nil {

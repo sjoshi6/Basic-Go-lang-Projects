@@ -1,4 +1,4 @@
-package main
+package components
 
 // MasterMessage : Format for messages to the master
 type MasterMessage struct {
