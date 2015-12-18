@@ -21,3 +21,7 @@ createdb db_lbapp
 ```
 psql db_lbapp
 ```
+### Creating a table to store passwords
+```
+create table userlogin (UserID VARCHAR(100), Password VARCHAR(200), Name VARCHAR(200));
+```
