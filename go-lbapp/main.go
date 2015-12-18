@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// Used for connecting to postgres
+
 func main() {
 
 	controller := make(chan generics.SyncMsg)

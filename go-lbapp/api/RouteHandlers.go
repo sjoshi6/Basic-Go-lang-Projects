@@ -2,8 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"go-lbapp/db"
 	"go-lbapp/generics"
 	"net/http"
+)
+
+const (
+
+	//DBName : Used for conenctions to database
+	DBName = "db_lbapp"
 )
 
 /* Contains all the Route Handlers for API function calls */
@@ -19,6 +26,14 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
+	// Used for per user connection to DB
+	dbconn := db.GetDBConn(DBName)
+	defer dbconn.Close()
+
+	/*  Add a DB insert command here to register new users
+	    Ensure new user credentials are hashed with bcrypt
+	*/
 
 	responsecontent := BasicResponse{
 		"User Registered Successfully",
