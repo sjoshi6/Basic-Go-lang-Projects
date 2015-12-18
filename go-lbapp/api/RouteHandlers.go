@@ -2,13 +2,23 @@ package api
 
 import (
 	"encoding/json"
+	"go-lbapp/generics"
 	"net/http"
 )
 
 /* Contains all the Route Handlers for API function calls */
 
-// SignUp : Handle Signup requests for new user
-func SignUp(w http.ResponseWriter, r *http.Request) {
+// CreateAccount : Handle Signup requests for new user
+func CreateAccount(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var signupdata generics.SignUpData
+
+	// Expand the json attached in post request
+	err := decoder.Decode(&signupdata)
+	if err != nil {
+		panic(err)
+	}
 
 	responsecontent := BasicResponse{
 		"User Registered Successfully",
@@ -18,8 +28,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	respondOrThrowErr(responsecontent, w)
 }
 
-// Login : Handle Login requests for existing users
-func Login(w http.ResponseWriter, r *http.Request) {
+// ConfirmCredentials : Handle Login requests for existing users
+func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 
 }
 

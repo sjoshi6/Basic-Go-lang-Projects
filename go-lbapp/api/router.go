@@ -1,6 +1,7 @@
 package api
 
 import (
+	"go-lbapp/generics"
 	"log"
 	"net/http"
 	"time"
@@ -15,18 +16,18 @@ var routes = Routes{
 		"signup",
 		"POST",
 		"/v1/signup",
-		SignUp,
+		CreateAccount,
 	},
 	Route{
 		"login",
-		"GET",
+		"POST",
 		"/v1/login",
-		Login,
+		ConfirmCredentials,
 	},
 }
 
 // StartServer : Start the API Server by calling this function
-func StartServer() {
+func StartServer(controller chan generics.SyncMsg) {
 
 	for _, route := range routes {
 
@@ -44,6 +45,8 @@ func StartServer() {
 	// Starting the api server
 	log.Fatal(http.ListenAndServe(":8000", router))
 
+	// to exit the main function
+	controller <- generics.SyncMsg{}
 }
 
 // Used to log route access times
