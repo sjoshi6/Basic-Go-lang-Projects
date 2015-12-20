@@ -9,3 +9,9 @@ type SignUpData struct {
 	Password string `json:"password"`
 	Name     string `json:"name"`
 }
+
+// LoginData : JSON format data for incoming login request
+type LoginData struct {
+	UserID   string `json:"userid"`
+	Password string `json:"password"`
+}

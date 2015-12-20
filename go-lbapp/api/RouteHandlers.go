@@ -36,11 +36,9 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	dbconn := db.GetDBConn(DBName)
 	defer dbconn.Close()
 
+	// Add an err handler here to ensure a failed signup request is handled
 	stmt, _ := dbconn.Prepare("INSERT INTO userlogin(UserID,Password,name) VALUES($1,$2,$3);")
 
-	/*  Add a DB insert command here to register new users
-	    Ensure new user credentials are hashed with bcrypt
-	*/
 	hash, err := bcrypt.GenerateFromPassword([]byte(signupdata.Password), cost)
 	if err != nil {
 
@@ -72,6 +70,49 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 // ConfirmCredentials : Handle Login requests for existing users
 func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var logindata generics.LoginData
+
+	// Expand the json attached in post request
+	err := decoder.Decode(&logindata)
+	if err != nil {
+		panic(err)
+	}
+
+	// Used for per user connection to DB
+	dbconn := db.GetDBConn(DBName)
+	defer dbconn.Close()
+
+	rows, err := dbconn.Query("SELECT Password FROM userlogin where UserID='" + string(logindata.UserID) + "'")
+	var password string
+
+	for rows.Next() {
+		rows.Scan(&password)
+	}
+
+	loginerr := bcrypt.CompareHashAndPassword([]byte(password), []byte(logindata.Password))
+	if loginerr != nil {
+
+		// If err is thrown credentials are mismatched
+		responsecontent := BasicResponse{
+			"Login Credentials are incorrect",
+			400,
+		}
+
+		w.Header().Set("StatusCode", "400")
+		w.Header().Set("Status", "Client Error")
+		respondOrThrowErr(responsecontent, w)
+		return
+	}
+
+	// If no error in comparehash means login Credentials match
+	responsecontent := BasicResponse{
+		"User Login Successful",
+		200,
+	}
+	w.Header().Set("StatusCode", "200")
+	respondOrThrowErr(responsecontent, w)
 
 }
 
