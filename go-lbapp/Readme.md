@@ -28,5 +28,5 @@ create table userlogin (UserID VARCHAR(100), Password VARCHAR(200), Name VARCHAR
 
 ### Creating a table to store new events
 ```
-create table Events(eventname VARCHAR(200), lat float, long float, creationtime time, creatorid VARCHAR(200));
+create table Events(id SERIAL, eventname VARCHAR(200), lat float, long float, creationtime time, creatorid VARCHAR(200));
 ```
