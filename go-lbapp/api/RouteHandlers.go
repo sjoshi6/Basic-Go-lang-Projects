@@ -127,6 +127,7 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(eventcreationdata)
 
 	// Used for per user connection to DB
 	dbconn := db.GetDBConn(DBName)
