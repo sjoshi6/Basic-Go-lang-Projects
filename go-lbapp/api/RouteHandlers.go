@@ -133,6 +133,30 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	defer dbconn.Close()
 
 	// Add code to manage event creation request
+	// Add an err handler here to ensure a failed signup request is handled
+	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, lat, long, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
+
+	_, execerr := stmt.Exec(string(eventcreationdata.EventName), eventcreationdata.Lat, eventcreationdata.Long, eventcreationdata.Creationtime, string(eventcreationdata.Creatiorid))
+	if execerr != nil {
+		// If execution err occurs then throw error
+		log.Fatal(execerr)
+		responsecontent := BasicResponse{
+			"Internal Server Error",
+			500,
+		}
+
+		w.Header().Set("StatusCode", "500")
+		w.Header().Set("Status", "Internal Server Error")
+		respondOrThrowErr(responsecontent, w)
+	}
+
+	// If no error then give a success response
+	responsecontent := BasicResponse{
+		"Event Created Successfully",
+		200,
+	}
+	w.Header().Set("StatusCode", "200")
+	respondOrThrowErr(responsecontent, w)
 
 }
 
