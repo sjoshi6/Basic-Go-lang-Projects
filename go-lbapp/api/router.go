@@ -24,6 +24,12 @@ var routes = Routes{
 		"/v1/login",
 		ConfirmCredentials,
 	},
+	Route{
+		"create_event",
+		"POST",
+		"/v1/create_event",
+		CreateEvent,
+	},
 }
 
 // StartServer : Start the API Server by calling this function

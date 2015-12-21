@@ -1,5 +1,7 @@
 package generics
 
+import "time"
+
 // SyncMsg : Used to send sync msgs between functions and main driver
 type SyncMsg struct{}
 
@@ -14,4 +16,13 @@ type SignUpData struct {
 type LoginData struct {
 	UserID   string `json:"userid"`
 	Password string `json:"password"`
+}
+
+// EventCreationData : JSON format data for event creation request
+type EventCreationData struct {
+	EventName    string    `json:"eventname"`
+	Lat          float64   `json:"latitude"`
+	Long         float64   `json:"longitude"`
+	Creationtime time.Time `json:"creationtime"`
+	Creatiorid   string    `json:"creatorid"`
 }

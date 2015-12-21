@@ -116,6 +116,26 @@ func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// CreateEvent : creates a new event at a base location
+func CreateEvent(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var eventcreationdata generics.EventCreationData
+
+	// Expand the json attached in post request
+	err := decoder.Decode(&eventcreationdata)
+	if err != nil {
+		panic(err)
+	}
+
+	// Used for per user connection to DB
+	dbconn := db.GetDBConn(DBName)
+	defer dbconn.Close()
+
+	// Add code to manage event creation request
+
+}
+
 // Respond to general requests or exit with server err.
 func respondOrThrowErr(responseObj BasicResponse, w http.ResponseWriter) {
 
