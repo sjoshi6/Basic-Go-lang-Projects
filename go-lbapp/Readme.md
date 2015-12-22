@@ -35,3 +35,5 @@ create table Events(id SERIAL, eventname VARCHAR(200), latitude float, longitude
 ```
 curl -X POST -d '{"eventname":"house warming party", "latitude":"100.2", "longitude":"127.3", "creationtime": "2015-12-15 07:36:25", "creatorid":"sjoshi6" }' http://localhost:8000/v1/create_event
 ```
+
+### Add a new table to insert event details with a foreign key to the Events table
