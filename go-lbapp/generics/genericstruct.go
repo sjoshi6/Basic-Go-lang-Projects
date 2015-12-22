@@ -22,5 +22,5 @@ type EventCreationData struct {
 	Lat          string `json:"latitude"`
 	Long         string `json:"longitude"`
 	Creationtime string `json:"creationtime"`
-	Creatiorid   string `json:"creatorid"`
+	Creatorid    string `json:"creatorid"`
 }

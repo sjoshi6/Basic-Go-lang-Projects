@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -112,18 +111,19 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(eventcreationdata)
 
 	// Convert Str input data to respective float / time fmt.
 	lat, _ := strconv.ParseFloat(eventcreationdata.Lat, 64)
 	long, _ := strconv.ParseFloat(eventcreationdata.Long, 64)
 
-	timeFmt := "2006-01-02T15:04:05Z"
-	time, err := time.Parse(timeFmt, eventcreationdata.Creationtime)
+	/*
+		timeFmt := "2006-12-02T15:04:05Z"
+		time, err := time.Parse(timeFmt, eventcreationdata.Creationtime)
 
-	if err != nil {
-		ThrowInternalErrAndExit(w)
-	}
+		if err != nil {
+			ThrowInternalErrAndExit(w)
+		}
+	*/
 
 	// Used for per user connection to DB
 	dbconn := db.GetDBConn(DBName)
@@ -133,7 +133,7 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	// Add an err handler here to ensure a failed signup request is handled
 	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, lat, long, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
 
-	_, execerr := stmt.Exec(string(eventcreationdata.EventName), lat, long, time, string(eventcreationdata.Creatiorid))
+	_, execerr := stmt.Exec(string(eventcreationdata.EventName), lat, long, eventcreationdata.Creationtime, string(eventcreationdata.Creatorid))
 	if execerr != nil {
 		// If execution err occurs then throw error
 		log.Fatal(execerr)
