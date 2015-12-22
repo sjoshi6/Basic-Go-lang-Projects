@@ -7,6 +7,8 @@ import (
 	"go-lbapp/generics"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,14 +45,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		fmt.Println("bcrypt hash creation broke")
-		responsecontent := BasicResponse{
-			"Internal Server Error",
-			500,
-		}
-
-		w.Header().Set("StatusCode", "500")
-		w.Header().Set("Status", "Internal Server Error")
-		respondOrThrowErr(responsecontent, w)
+		ThrowInternalErrAndExit(w)
 
 	} else {
 
@@ -59,12 +54,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		responsecontent := BasicResponse{
-			"User Registered Successfully",
-			200,
-		}
-		respondOrThrowErr(responsecontent, w)
-
+		RespondSuccessAndExit(w, "User Registered Successfully")
 	}
 }
 
@@ -102,17 +92,12 @@ func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("StatusCode", "400")
 		w.Header().Set("Status", "Client Error")
-		respondOrThrowErr(responsecontent, w)
+		RespondOrThrowErr(responsecontent, w)
 		return
 	}
 
 	// If no error in comparehash means login Credentials match
-	responsecontent := BasicResponse{
-		"User Login Successful",
-		200,
-	}
-	w.Header().Set("StatusCode", "200")
-	respondOrThrowErr(responsecontent, w)
+	RespondSuccessAndExit(w, "User Login Successful")
 
 }
 
@@ -129,6 +114,17 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(eventcreationdata)
 
+	// Convert Str input data to respective float / time fmt.
+	lat, _ := strconv.ParseFloat(eventcreationdata.Lat, 64)
+	long, _ := strconv.ParseFloat(eventcreationdata.Long, 64)
+
+	timeFmt := "2006-01-02T15:04:05Z"
+	time, err := time.Parse(timeFmt, eventcreationdata.Creationtime)
+
+	if err != nil {
+		ThrowInternalErrAndExit(w)
+	}
+
 	// Used for per user connection to DB
 	dbconn := db.GetDBConn(DBName)
 	defer dbconn.Close()
@@ -137,38 +133,14 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	// Add an err handler here to ensure a failed signup request is handled
 	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, lat, long, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
 
-	_, execerr := stmt.Exec(string(eventcreationdata.EventName), eventcreationdata.Lat, eventcreationdata.Long, eventcreationdata.Creationtime, string(eventcreationdata.Creatiorid))
+	_, execerr := stmt.Exec(string(eventcreationdata.EventName), lat, long, time, string(eventcreationdata.Creatiorid))
 	if execerr != nil {
 		// If execution err occurs then throw error
 		log.Fatal(execerr)
-		responsecontent := BasicResponse{
-			"Internal Server Error",
-			500,
-		}
-
-		w.Header().Set("StatusCode", "500")
-		w.Header().Set("Status", "Internal Server Error")
-		respondOrThrowErr(responsecontent, w)
+		ThrowInternalErrAndExit(w)
 	}
 
 	// If no error then give a success response
-	responsecontent := BasicResponse{
-		"Event Created Successfully",
-		200,
-	}
-	w.Header().Set("StatusCode", "200")
-	respondOrThrowErr(responsecontent, w)
+	RespondSuccessAndExit(w, "Event Created Successfully")
 
-}
-
-// Respond to general requests or exit with server err.
-func respondOrThrowErr(responseObj BasicResponse, w http.ResponseWriter) {
-
-	responseJSON, err := json.Marshal(responseObj)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(responseJSON)
 }
