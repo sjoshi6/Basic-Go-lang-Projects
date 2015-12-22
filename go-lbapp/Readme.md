@@ -28,7 +28,7 @@ create table userlogin (UserID VARCHAR(100), Password VARCHAR(200), Name VARCHAR
 
 ### Creating a table to store new events
 ```
-create table Events(id SERIAL, eventname VARCHAR(200), lat float, long float, creationtime timestamp, creatorid VARCHAR(200));
+create table Events(id SERIAL, eventname VARCHAR(200), latitude float, longitude float, creationtime timestamp, creatorid VARCHAR(200));
 ```
 
 ### Curl command to insert create event
