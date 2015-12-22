@@ -131,7 +131,7 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 
 	// Add code to manage event creation request
 	// Add an err handler here to ensure a failed signup request is handled
-	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, lat, long, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
+	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, latitude, longitude, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
 
 	_, execerr := stmt.Exec(string(eventcreationdata.EventName), lat, long, eventcreationdata.Creationtime, string(eventcreationdata.Creatorid))
 	if execerr != nil {
