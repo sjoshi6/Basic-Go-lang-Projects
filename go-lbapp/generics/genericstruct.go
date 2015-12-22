@@ -24,3 +24,10 @@ type EventCreationData struct {
 	Creationtime string `json:"creationtime"`
 	Creatorid    string `json:"creatorid"`
 }
+
+// SearchEventsData : JSON format data for finding events
+type SearchEventsData struct {
+	Lat    string `json:"latitude"`
+	Long   string `json:"longitude"`
+	Radius string `json:"radius"`
+}

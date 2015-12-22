@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/kellydunn/golang-geo"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -116,15 +118,6 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	lat, _ := strconv.ParseFloat(eventcreationdata.Lat, 64)
 	long, _ := strconv.ParseFloat(eventcreationdata.Long, 64)
 
-	/*
-		timeFmt := "2006-12-02T15:04:05Z"
-		time, err := time.Parse(timeFmt, eventcreationdata.Creationtime)
-
-		if err != nil {
-			ThrowInternalErrAndExit(w)
-		}
-	*/
-
 	// Used for per user connection to DB
 	dbconn := db.GetDBConn(DBName)
 	defer dbconn.Close()
@@ -143,4 +136,27 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	// If no error then give a success response
 	RespondSuccessAndExit(w, "Event Created Successfully")
 
+}
+
+// SearchEventsByRange : Used to search events created in a chosen radius
+func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var searchevents generics.SearchEventsData
+
+	// Expand the json attached in post request
+	err := decoder.Decode(&searchevents)
+	if err != nil {
+		panic(err)
+	}
+
+	lat, _ := strconv.ParseFloat(searchevents.Lat, 64)
+	long, _ := strconv.ParseFloat(searchevents.Long, 64)
+
+	point := geo.NewPoint(lat, long)
+	db, err := geo.HandleWithSQL()
+
+	events, _ := db.PointsWithinRadius(point, 5)
+
+	fmt.Println(events)
 }
