@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"expvar"
 	"fmt"
 	"go-lbapp/db"
 	"go-lbapp/generics"
@@ -21,10 +22,15 @@ const (
 	cost   int = 10
 )
 
+// Map for number of route hits
+var routeHits = expvar.NewMap("routeHits").Init()
+
 /* Contains all the Route Handlers for API function calls */
 
 // CreateAccount : Handle Signup requests for new user
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
+
+	routeHits.Add("/v1/signup", 1)
 
 	decoder := json.NewDecoder(r.Body)
 	var signupdata generics.SignUpData
@@ -61,6 +67,8 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 // ConfirmCredentials : Handle Login requests for existing users
 func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
+
+	routeHits.Add("/v1/login", 1)
 
 	decoder := json.NewDecoder(r.Body)
 	var logindata generics.LoginData
@@ -104,6 +112,8 @@ func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 
 // CreateEvent : creates a new event at a base location
 func CreateEvent(w http.ResponseWriter, r *http.Request) {
+
+	routeHits.Add("/v1/create_event", 1)
 
 	decoder := json.NewDecoder(r.Body)
 	var eventcreationdata generics.EventCreationData

@@ -48,6 +48,9 @@ func StartServer(controller chan generics.SyncMsg) {
 			Handler(handler)
 	}
 
+	// This route is essential to view the monitoring stats for the app.
+	router.Handle("/debug/vars", http.DefaultServeMux)
+
 	// Starting the api server
 	log.Fatal(http.ListenAndServe(":8000", router))
 
