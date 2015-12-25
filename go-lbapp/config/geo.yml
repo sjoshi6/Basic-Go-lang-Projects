@@ -2,5 +2,5 @@ development:
   driver: postgres
   openStr: dbname=db_lbapp sslmode=disable
   table: Events
-  latCol: latitude
-  lngCol: longitude
+  latCol: lat
+  lngCol: lat

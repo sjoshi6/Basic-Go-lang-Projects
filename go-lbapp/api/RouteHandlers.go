@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/kellydunn/golang-geo"
 
@@ -134,7 +135,7 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 
 	// Add code to manage event creation request
 	// Add an err handler here to ensure a failed signup request is handled
-	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, latitude, longitude, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
+	stmt, _ := dbconn.Prepare("INSERT INTO Events(eventname, lat, lng, creationtime, creatorid) VALUES($1,$2,$3,$4,$5);")
 
 	_, execerr := stmt.Exec(string(eventcreationdata.EventName), lat, long, eventcreationdata.Creationtime, string(eventcreationdata.Creatorid))
 	if execerr != nil {
@@ -151,6 +152,14 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 // SearchEventsByRange : Used to search events created in a chosen radius
 func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 
+	// for unpacking events
+	var (
+		id           string
+		eventname    string
+		creationtime time.Time
+		creatorid    string
+	)
+
 	decoder := json.NewDecoder(r.Body)
 	var searchevents generics.SearchEventsData
 
@@ -160,13 +169,44 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	// Create a geo point using lat & longitude
 	lat, _ := strconv.ParseFloat(searchevents.Lat, 64)
 	long, _ := strconv.ParseFloat(searchevents.Long, 64)
-
 	point := geo.NewPoint(lat, long)
-	db, err := geo.HandleWithSQL()
 
-	events, _ := db.PointsWithinRadius(point, 5)
+	dbconn := db.GetDBConn(DBName)
+	sqlMapper, _ := geo.NewSQLMapper("config/geo.yml", dbconn)
+	events, _ := sqlMapper.PointsWithinRadius(point, 5.0)
 
-	fmt.Println(events)
+	var returnEvents generics.Events
+
+	for events.Next() {
+		err := events.Scan(&id, &eventname, &lat, &long, &creationtime, &creatorid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		event := generics.EventFmt{
+			id,
+			eventname,
+			strconv.FormatFloat(lat, 'f', 6, 64),
+			strconv.FormatFloat(long, 'f', 6, 64),
+			creationtime.Format("2014-06-08T02:02:22Z"),
+			creatorid,
+		}
+		returnEvents = append(returnEvents, event)
+
+	}
+
+	// Create a JSON to reply to the client
+	reply := generics.SearchResults{returnEvents}
+	jsonReply, err := json.Marshal(reply)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Append the data to response writer
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("StatusCode", "200")
+	w.Write(jsonReply)
 }

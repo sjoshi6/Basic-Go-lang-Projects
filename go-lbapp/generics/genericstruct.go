@@ -25,9 +25,27 @@ type EventCreationData struct {
 	Creatorid    string `json:"creatorid"`
 }
 
+// EventFmt : to wrap data for returning
+type EventFmt struct {
+	ID           string `json:"id"`
+	EventName    string `json:"eventname"`
+	Lat          string `json:"latitude"`
+	Long         string `json:"longitude"`
+	Creationtime string `json:"creationtime"`
+	Creatorid    string `json:"creatorid"`
+}
+
+// Events : slice of EventFmt
+type Events []EventFmt
+
 // SearchEventsData : JSON format data for finding events
 type SearchEventsData struct {
 	Lat    string `json:"latitude"`
 	Long   string `json:"longitude"`
 	Radius string `json:"radius"`
+}
+
+// SearchResults : Fmt of JSON for returning results
+type SearchResults struct {
+	Events Events `json:"events"`
 }

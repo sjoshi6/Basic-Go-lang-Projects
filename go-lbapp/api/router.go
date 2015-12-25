@@ -30,6 +30,12 @@ var routes = Routes{
 		"/v1/create_event",
 		CreateEvent,
 	},
+	Route{
+		"search_events",
+		"GET",
+		"/v1/search_events",
+		SearchEventsByRange,
+	},
 }
 
 // StartServer : Start the API Server by calling this function
