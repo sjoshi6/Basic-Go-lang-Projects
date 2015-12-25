@@ -30,8 +30,7 @@ func ThrowInternalErrAndExit(w http.ResponseWriter) {
 		500,
 	}
 
-	w.Header().Set("StatusCode", "500")
-	w.Header().Set("Status", "Internal Server Error")
+	w.WriteHeader(http.StatusInternalServerError)
 	RespondOrThrowErr(responsecontent, w)
 }
 
@@ -42,7 +41,7 @@ func RespondSuccessAndExit(w http.ResponseWriter, msg string) {
 		msg,
 		200,
 	}
-	w.Header().Set("StatusCode", "200")
+	w.WriteHeader(http.StatusOK)
 	RespondOrThrowErr(responsecontent, w)
 
 }

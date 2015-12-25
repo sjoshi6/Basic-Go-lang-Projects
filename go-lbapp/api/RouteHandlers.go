@@ -100,7 +100,7 @@ func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 			400,
 		}
 
-		w.Header().Set("StatusCode", "400")
+		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Status", "Client Error")
 		RespondOrThrowErr(responsecontent, w)
 		return
@@ -207,6 +207,6 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 
 	// Append the data to response writer
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("StatusCode", "200")
+	w.WriteHeader(http.StatusOK)
 	w.Write(jsonReply)
 }
