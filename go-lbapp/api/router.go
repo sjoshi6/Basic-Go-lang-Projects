@@ -10,7 +10,7 @@ import (
 )
 
 // Central router for all API requests
-var router = mux.NewRouter().StrictSlash(true)
+
 var routes = Routes{
 	Route{
 		"signup",
@@ -41,6 +41,18 @@ var routes = Routes{
 // StartServer : Start the API Server by calling this function
 func StartServer(controller chan generics.SyncMsg) {
 
+	// Starting the api server
+	router := GetRouter()
+	log.Fatal(http.ListenAndServe(":8000", router))
+
+	// to exit the main function
+	controller <- generics.SyncMsg{}
+}
+
+// GetRouter : Get an object of gorilla mux router
+func GetRouter() *mux.Router {
+
+	var router = mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
 
 		var handler http.Handler
@@ -57,11 +69,7 @@ func StartServer(controller chan generics.SyncMsg) {
 	// This route is essential to view the monitoring stats for the app.
 	router.Handle("/debug/vars", http.DefaultServeMux)
 
-	// Starting the api server
-	log.Fatal(http.ListenAndServe(":8000", router))
-
-	// to exit the main function
-	controller <- generics.SyncMsg{}
+	return router
 }
 
 // Used to log route access times
