@@ -3,4 +3,4 @@ development:
   openStr: dbname=db_lbapp sslmode=disable
   table: Events
   latCol: lat
-  lngCol: lat
+  lngCol: lng

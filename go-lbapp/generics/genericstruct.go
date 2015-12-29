@@ -33,8 +33,8 @@ type EventCreationData struct {
 	MaxAge       string `json:"max_age"`
 }
 
-// EventFmt : to wrap data for returning
-type EventFmt struct {
+// Event : to wrap data for returning
+type Event struct {
 	ID           string `json:"id"`
 	EventName    string `json:"eventname"`
 	Lat          string `json:"latitude"`
@@ -52,7 +52,7 @@ type EventFmt struct {
 }
 
 // Events : slice of EventFmt
-type Events []EventFmt
+type Events []Event
 
 // SearchEventsData : JSON format data for finding events
 type SearchEventsData struct {

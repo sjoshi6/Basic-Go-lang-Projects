@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"expvar"
 	"fmt"
@@ -11,16 +12,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kellydunn/golang-geo"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
 const (
 
 	//DBName : Used for conenctions to database
-	DBName     = "db_lbapp"
-	cost   int = 10
+	DBName              = "db_lbapp"
+	eventsTableName     = "Events"
+	cost            int = 10
 )
 
 // Map for number of route hits
@@ -183,10 +183,12 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 		maxAge       int64
 	)
 
-	decoder := json.NewDecoder(r.Body)
+	var returnEvents generics.Events
 	var searchevents generics.SearchEventsData
 
+	decoder := json.NewDecoder(r.Body)
 	// Expand the json attached in post request
+
 	err := decoder.Decode(&searchevents)
 	if err != nil {
 		panic(err)
@@ -195,22 +197,25 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 	// Create a geo point using lat & longitude
 	lat, _ := strconv.ParseFloat(searchevents.Lat, 64)
 	long, _ := strconv.ParseFloat(searchevents.Long, 64)
-	point := geo.NewPoint(lat, long)
+	radius, _ := strconv.ParseFloat(searchevents.Radius, 64)
 
-	dbconn := db.GetDBConn(DBName)
-	sqlMapper, _ := geo.NewSQLMapper("config/geo.yml", dbconn)
-	events, _ := sqlMapper.PointsWithinRadius(point, 100.0)
+	events, err := getEnventsByRange(lat, long, radius)
 
-	var returnEvents generics.Events
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	for events.Next() {
 		err := events.Scan(&id, &eventname, &lat, &long,
 			&creationtime, &creatorid, &starttime, &endtime, &maxMem, &minMem,
 			&friendOnly, &gender, &minAge, &maxAge)
+
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		event := generics.EventFmt{
+		event := generics.Event{
+
 			id,
 			eventname,
 			strconv.FormatFloat(lat, 'f', 6, 64),
@@ -219,12 +224,12 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 			creatorid,
 			starttime.Format("2014-06-08T02:02:22Z"),
 			endtime.Format("2014-06-08T02:02:22Z"),
-			strconv.FormatInt(maxMem, 64),
-			strconv.FormatInt(minMem, 64),
+			strconv.FormatInt(maxMem, 10),
+			strconv.FormatInt(minMem, 10),
 			strconv.FormatBool(friendOnly),
 			gender,
-			strconv.FormatInt(minAge, 64),
-			strconv.FormatInt(maxAge, 64),
+			strconv.FormatInt(minAge, 10),
+			strconv.FormatInt(maxAge, 10),
 		}
 
 		returnEvents = append(returnEvents, event)
@@ -243,4 +248,24 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonReply)
+}
+
+func getEnventsByRange(lat, long, radius float64) (*sql.Rows, error) {
+
+	selectStr := fmt.Sprintf("SELECT * FROM %v a", eventsTableName)
+	lat1 := fmt.Sprintf("sin(radians(%f)) * sin(radians(a.lat))", lat)
+	lng1 := fmt.Sprintf("cos(radians(%f)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(%f))", lat, long)
+	whereStr := fmt.Sprintf("WHERE acos(%s + %s) * %f <= %f", lat1, lng1, 6356.7523, radius)
+	query := fmt.Sprintf("%s %s", selectStr, whereStr)
+
+	// Printing the query to confirm output
+	fmt.Println(query)
+
+	dbconn := db.GetDBConn(DBName)
+	res, err := dbconn.Query(query)
+	if err != nil {
+		panic(err)
+	}
+
+	return res, err
 }
