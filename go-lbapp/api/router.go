@@ -39,11 +39,11 @@ var routes = Routes{
 }
 
 // StartServer : Start the API Server by calling this function
-func StartServer(controller chan generics.SyncMsg) {
+func StartServer(port string, controller chan generics.SyncMsg) {
 
 	// Starting the api server
 	router := GetRouter()
-	log.Fatal(http.ListenAndServe(":8000", router))
+	log.Fatal(http.ListenAndServe(port, router))
 
 	// to exit the main function
 	controller <- generics.SyncMsg{}
