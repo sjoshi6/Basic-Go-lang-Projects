@@ -258,9 +258,6 @@ func getEnventsByRange(lat, long, radius float64) (*sql.Rows, error) {
 	whereStr := fmt.Sprintf("WHERE acos(%s + %s) * %f <= %f", lat1, lng1, 6356.7523, radius)
 	query := fmt.Sprintf("%s %s", selectStr, whereStr)
 
-	// Printing the query to confirm output
-	fmt.Println(query)
-
 	dbconn := db.GetDBConn(DBName)
 	res, err := dbconn.Query(query)
 	if err != nil {
