@@ -50,5 +50,8 @@ curl -X POST -d '{"eventname":"Monopoly at my place", "latitude":"100.80", "long
 curl -X GET -d '{"latitude":"100.8", "longitude":"111.2", "radius": "100"}' http://localhost:8000/v1/search_events
 ```
 
-
-
+### Starting two golang API Servers on two ports
+```
+./go-lbapp 8000
+./go-lbapp 8001
+```
