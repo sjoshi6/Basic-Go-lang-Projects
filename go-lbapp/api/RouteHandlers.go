@@ -47,7 +47,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	defer dbconn.Close()
 
 	// Add an err handler here to ensure a failed signup request is handled
-	stmt, _ := dbconn.Prepare("INSERT INTO userlogin(UserID,Password,name) VALUES($1,$2,$3);")
+	stmt, _ := dbconn.Prepare("INSERT INTO Users(UserId,Password,FirstName,LastName,Gender,Age,PhoneNumber) VALUES($1,$2,$3,$4,$5,$6,$7);")
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(signupdata.Password), cost)
 	if err != nil {
@@ -57,7 +57,16 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 
-		_, err := stmt.Exec(string(signupdata.UserID), string(hash), string(signupdata.Name))
+		age, _ := strconv.ParseInt(signupdata.Age, 10, 64)
+
+		_, err := stmt.Exec(signupdata.UserID,
+			string(hash),
+			signupdata.FirstName,
+			signupdata.LastName,
+			signupdata.Gender,
+			age,
+			signupdata.PhoneNumber)
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -84,7 +93,7 @@ func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 	dbconn := db.GetDBConn(DBName)
 	defer dbconn.Close()
 
-	rows, err := dbconn.Query("SELECT Password FROM userlogin where UserID='" + string(logindata.UserID) + "'")
+	rows, err := dbconn.Query("SELECT Password FROM Users where UserID='" + string(logindata.UserID) + "'")
 	var password string
 
 	for rows.Next() {

@@ -5,9 +5,13 @@ type SyncMsg struct{}
 
 // SignUpData : Generic struct to use for signup requests
 type SignUpData struct {
-	UserID   string `json:"userid"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	UserID      string `json:"userid"`
+	Password    string `json:"password"`
+	FirstName   string `json:"firstname"`
+	LastName    string `json:"lastname"`
+	Gender      string `json:"gender"`
+	Age         string `json:"age"`
+	PhoneNumber string `json:"phonenumber"`
 }
 
 // LoginData : JSON format data for incoming login request
