@@ -23,12 +23,12 @@ psql db_lbapp
 ```
 ### Creating a table to store passwords
 ```
-create table userlogin (UserID VARCHAR(100), Password VARCHAR(200), Name VARCHAR(200));
+create table Users(UserId VARCHAR(100) PRIMARY KEY,Password VARCHAR(200) NOT NULL, FirstName VARCHAR(200) NOT NULL, LastName VARCHAR(200) NOT NULL, Gender CHAR(1) NOT NULL, Age Int NOT NULL, PhoneNumber VARCHAR(20) NOT NULL);
 ```
 
 ### Creating a table to store new events
 ```
-create table Events(id SERIAL, event_name VARCHAR(200), lat float, lng float, creation_time timestamp, creator_id VARCHAR(200), start_time timestamp, end_time timestamp, max_mem int, min_mem int, friend_only boolean, gender CHAR(1), min_age int, max_age int);
+create table Events(id SERIAL PRIMARY KEY, event_name VARCHAR(200) NOT NULL, lat float NOT NULL, lng float NOT NULL, creation_time timestamp NOT NULL, creator_id VARCHAR(200) NOT NULL, start_time timestamp NOT NULL, end_time timestamp, max_mem int, min_mem int, friend_only boolean NOT NULL, gender CHAR(1) NOT NULL, min_age int, max_age int, FOREIGN KEY (creator_id) REFERENCES Users);
 ```
 
 ### To create postgres user
