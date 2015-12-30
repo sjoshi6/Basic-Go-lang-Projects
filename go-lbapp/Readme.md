@@ -21,14 +21,20 @@ createdb db_lbapp
 ```
 psql db_lbapp
 ```
-### Creating a table to store passwords
+### Creating a table to store user details
 ```
-create table userlogin (UserID VARCHAR(100), Password VARCHAR(200), Name VARCHAR(200));
+create table Users(UserId VARCHAR(100) PRIMARY KEY,Password VARCHAR(200) NOT NULL, FirstName VARCHAR(200) NOT NULL, LastName VARCHAR(200) NOT NULL, Gender CHAR(1) NOT NULL, Age Int NOT NULL, PhoneNumber VARCHAR(20) NOT NULL);
+```
+### POST signup data & login
+```
+curl -X POST -d '{"userid":"sjoshi6", "password":"xxxxxx", "firstname": "xxxx", "lastname":"xxxx", "gender": "M", "age": "xx", "phonenumber":"xxxxxxxxxx"}' http://localhost:8000/v1/signup
+
+curl -X POST -d '{"userid":"sjoshi6", "password":"saurabh8391"}' http://localhost:8000/v1/login
 ```
 
 ### Creating a table to store new events
 ```
-create table Events(id SERIAL, event_name VARCHAR(200), lat float, lng float, creation_time timestamp, creator_id VARCHAR(200), start_time timestamp, end_time timestamp, max_mem int, min_mem int, friend_only boolean, gender CHAR(1), min_age int, max_age int);
+create table Events(id SERIAL PRIMARY KEY, event_name VARCHAR(200) NOT NULL, lat float NOT NULL, lng float NOT NULL, creation_time timestamp NOT NULL, creator_id VARCHAR(200) NOT NULL, start_time timestamp NOT NULL, end_time timestamp, max_mem int, min_mem int, friend_only boolean NOT NULL, gender CHAR(1) NOT NULL, min_age int, max_age int, FOREIGN KEY (creator_id) REFERENCES Users);
 ```
 
 ### To create postgres user
@@ -50,5 +56,8 @@ curl -X POST -d '{"eventname":"Monopoly at my place", "latitude":"100.80", "long
 curl -X GET -d '{"latitude":"100.8", "longitude":"111.2", "radius": "100"}' http://localhost:8000/v1/search_events
 ```
 
-
-
+### Starting two golang API Servers on two ports
+```
+./go-lbapp 8000
+./go-lbapp 8001
+```
