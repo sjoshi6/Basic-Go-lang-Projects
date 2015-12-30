@@ -21,9 +21,15 @@ createdb db_lbapp
 ```
 psql db_lbapp
 ```
-### Creating a table to store passwords
+### Creating a table to store user details
 ```
 create table Users(UserId VARCHAR(100) PRIMARY KEY,Password VARCHAR(200) NOT NULL, FirstName VARCHAR(200) NOT NULL, LastName VARCHAR(200) NOT NULL, Gender CHAR(1) NOT NULL, Age Int NOT NULL, PhoneNumber VARCHAR(20) NOT NULL);
+```
+### POST signup data & login
+```
+curl -X POST -d '{"userid":"sjoshi6", "password":"xxxxxx", "firstname": "xxxx", "lastname":"xxxx", "gender": "M", "age": "xx", "phonenumber":"xxxxxxxxxx"}' http://localhost:8000/v1/signup
+
+curl -X POST -d '{"userid":"sjoshi6", "password":"saurabh8391"}' http://localhost:8000/v1/login
 ```
 
 ### Creating a table to store new events
