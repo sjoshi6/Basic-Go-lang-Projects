@@ -268,6 +268,8 @@ func getEnventsByRange(lat, long, radius float64) (*sql.Rows, error) {
 	query := fmt.Sprintf("%s %s", selectStr, whereStr)
 
 	dbconn := db.GetDBConn(DBName)
+	defer dbconn.Close()
+
 	res, err := dbconn.Query(query)
 	if err != nil {
 		panic(err)
