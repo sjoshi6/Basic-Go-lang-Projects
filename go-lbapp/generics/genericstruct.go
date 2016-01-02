@@ -1,5 +1,7 @@
 package generics
 
+import "go-lbapp/model"
+
 // SyncMsg : Used to send sync msgs between functions and main driver
 type SyncMsg struct{}
 
@@ -37,26 +39,8 @@ type EventCreationData struct {
 	MaxAge       string `json:"max_age"`
 }
 
-// Event : to wrap data for returning
-type Event struct {
-	ID           string `json:"id"`
-	EventName    string `json:"eventname"`
-	Lat          string `json:"latitude"`
-	Long         string `json:"longitude"`
-	Creationtime string `json:"creationtime"`
-	Creatorid    string `json:"creatorid"`
-	StartTime    string `json:"start_time"`
-	EndTime      string `json:"end_time"`
-	MaxMem       string `json:"max_mem"`
-	MinMem       string `json:"min_mem"`
-	FriendOnly   string `json:"friend_only"`
-	Gender       string `json:"gender"`
-	MinAge       string `json:"min_age"`
-	MaxAge       string `json:"max_age"`
-}
-
 // Events : slice of EventFmt
-type Events []Event
+type Events []models.Event
 
 // SearchEventsData : JSON format data for finding events
 type SearchEventsData struct {

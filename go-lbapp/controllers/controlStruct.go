@@ -1,4 +1,4 @@
-package api
+package controllers
 
 import "net/http"
 
@@ -12,9 +12,3 @@ type Route struct {
 
 // Routes : Generic Array Struct for all routes
 type Routes []Route
-
-// BasicResponse : JSON reply for API Calls
-type BasicResponse struct {
-	Message string `json:"message"`
-	Status  int    `json:"status"`
-}

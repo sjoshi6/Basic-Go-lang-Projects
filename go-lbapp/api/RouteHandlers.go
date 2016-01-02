@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"expvar"
 	"fmt"
+	"go-lbapp/config"
 	"go-lbapp/db"
 	"go-lbapp/generics"
+	"go-lbapp/model"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,9 +20,9 @@ import (
 const (
 
 	//DBName : Used for conenctions to database
-	DBName              = "db_lbapp"
-	eventsTableName     = "Events"
-	cost            int = 10
+	DBName              = settings.DBName
+	eventsTableName     = settings.EventsTableName
+	cost            int = settings.Cost
 )
 
 // Map for number of route hits
@@ -223,7 +225,7 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		event := generics.Event{
+		event := models.Event{
 
 			id,
 			eventname,
