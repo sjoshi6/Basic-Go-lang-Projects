@@ -1,23 +1,24 @@
 package controllers
 
 import (
+	"go-lbapp/api"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-var routes = Routes{
+var restroutes = Routes{
 	Route{
 		"user",
 		"GET",
 		"/v1/user/{userid}",
-		UserHandler,
+		api.UserHandler,
 	},
 }
 
 // SetResourceRoutes : Used to add REST resource routes to mux
 func SetResourceRoutes(router *mux.Router) *mux.Router {
-	for _, route := range routes {
+	for _, route := range restroutes {
 
 		var handler http.Handler
 		handler = route.HandlerFunc
