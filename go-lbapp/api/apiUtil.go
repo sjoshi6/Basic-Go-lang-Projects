@@ -34,6 +34,18 @@ func ThrowInternalErrAndExit(w http.ResponseWriter) {
 	RespondOrThrowErr(responsecontent, w)
 }
 
+// ThrowForbiddenedAndExit : Used for requests whose resource is not found
+func ThrowForbiddenedAndExit(w http.ResponseWriter) {
+
+	responsecontent := BasicResponse{
+		"Internal Server Error",
+		403,
+	}
+
+	w.WriteHeader(http.StatusForbidden)
+	RespondOrThrowErr(responsecontent, w)
+}
+
 // RespondSuccessAndExit : Repond with a success
 func RespondSuccessAndExit(w http.ResponseWriter, msg string) {
 

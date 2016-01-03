@@ -28,13 +28,13 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	defer dbconn.Close()
 
 	err := dbconn.
-		QueryRow("SELECT userid, firstname, lastname, gender, age, phonenumber FROM users WHERE name = $1", userid).
+		QueryRow("SELECT userid, firstname, lastname, gender, age, phonenumber FROM users WHERE userid = $1", userid).
 		Scan(&u.UserID, &u.FirstName, &u.LastName, &u.Gender, &u.Age, &u.PhoneNumber)
 
 	if err != nil {
 		// If execution err occurs then throw error
 		log.Fatal(err)
-		ThrowInternalErrAndExit(w)
+		ThrowForbiddenedAndExit(w)
 	}
 
 	jsonResponse, err := json.Marshal(u)
