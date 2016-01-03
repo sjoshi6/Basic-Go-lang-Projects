@@ -23,12 +23,6 @@ var routes = Routes{
 		api.ConfirmCredentials,
 	},
 	Route{
-		"create_event",
-		"POST",
-		"/v1/create_event",
-		api.CreateEvent,
-	},
-	Route{
 		"search_events",
 		"GET",
 		"/v1/search_events",

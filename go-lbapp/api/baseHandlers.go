@@ -122,59 +122,6 @@ func ConfirmCredentials(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// CreateEvent : creates a new event at a base location
-func CreateEvent(w http.ResponseWriter, r *http.Request) {
-
-	routeHits.Add("/v1/create_event", 1)
-
-	decoder := json.NewDecoder(r.Body)
-	var eventcreationdata generics.EventCreationData
-
-	// Expand the json attached in post request
-	err := decoder.Decode(&eventcreationdata)
-	if err != nil {
-		panic(err)
-	}
-
-	// Convert Str input data to respective float / time fmt.
-	creationTimeStr := time.Now().Format(time.RFC3339)
-	fmt.Println(creationTimeStr)
-
-	lat, _ := strconv.ParseFloat(eventcreationdata.Lat, 64)
-	long, _ := strconv.ParseFloat(eventcreationdata.Long, 64)
-	maxMem, _ := strconv.ParseInt(eventcreationdata.MaxMem, 10, 64)
-	minMem, _ := strconv.ParseInt(eventcreationdata.MinMem, 10, 64)
-	maxAge, _ := strconv.ParseInt(eventcreationdata.MaxAge, 10, 64)
-	minAge, _ := strconv.ParseInt(eventcreationdata.MinAge, 10, 64)
-
-	// Used for per user connection to DB
-	dbconn := db.GetDBConn(DBName)
-	defer dbconn.Close()
-
-	// Add code to manage event creation request
-	// Add an err handler here to ensure a failed signup request is handled
-	stmt, _ := dbconn.Prepare(`INSERT INTO Events(event_name, lat, lng,
-          creation_time, creator_id, start_time, end_time, max_mem, min_mem,
-          friend_only, gender, min_age, max_age)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);`)
-
-	_, execerr := stmt.Exec(string(eventcreationdata.EventName),
-		lat, long, creationTimeStr,
-		string(eventcreationdata.Creatorid), eventcreationdata.StartTime,
-		eventcreationdata.EndTime, maxMem, minMem, eventcreationdata.FriendOnly,
-		eventcreationdata.Gender, minAge, maxAge)
-
-	if execerr != nil {
-		// If execution err occurs then throw error
-		log.Fatal(execerr)
-		ThrowInternalErrAndExit(w)
-	}
-
-	// If no error then give a success response
-	RespondSuccessAndExit(w, "Event Created Successfully")
-
-}
-
 // SearchEventsByRange : Used to search events created in a chosen radius
 func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 

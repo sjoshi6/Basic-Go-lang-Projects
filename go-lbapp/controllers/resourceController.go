@@ -18,7 +18,19 @@ var restroutes = Routes{
 		"getEvent",
 		"GET",
 		"/v1/event/{eventid}",
-		api.EventHandler,
+		api.GetEventHandler,
+	},
+	Route{
+		"setEvent",
+		"POST",
+		"/v1/event",
+		api.CreateEvent,
+	},
+	Route{
+		"deleteEvent",
+		"DELETE",
+		"/v1/event/{eventid}",
+		api.DeleteEvent,
 	},
 }
 
