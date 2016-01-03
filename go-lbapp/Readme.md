@@ -34,7 +34,7 @@ curl -X POST -d '{"userid":"sjoshi6", "password":"saurabh8391"}' http://localhos
 
 ### Creating a table to store new events
 ```
-create table Events(id SERIAL PRIMARY KEY, event_name VARCHAR(200) NOT NULL, lat float NOT NULL, lng float NOT NULL, creation_time timestamp NOT NULL, creator_id VARCHAR(200) NOT NULL, start_time timestamp NOT NULL, end_time timestamp, max_mem int, min_mem int, friend_only boolean NOT NULL, gender CHAR(1) NOT NULL, min_age int, max_age int, FOREIGN KEY (creator_id) REFERENCES Users);
+create table Events(id SERIAL PRIMARY KEY, event_name VARCHAR(200) NOT NULL, lat float NOT NULL, lng float NOT NULL, creation_time timestamp NOT NULL, creator_id VARCHAR(200) NOT NULL, start_time timestamp NOT NULL, end_time timestamp, max_mem int, min_mem int, friend_only boolean NOT NULL, gender CHAR(1) NOT NULL, min_age int, max_age int, current_mem int, FOREIGN KEY (creator_id) REFERENCES Users);
 ```
 
 ### To create postgres user
