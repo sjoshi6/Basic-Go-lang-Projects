@@ -38,7 +38,7 @@ func ThrowInternalErrAndExit(w http.ResponseWriter) {
 func ThrowForbiddenedAndExit(w http.ResponseWriter) {
 
 	responsecontent := BasicResponse{
-		"Internal Server Error",
+		"Forbidden",
 		403,
 	}
 

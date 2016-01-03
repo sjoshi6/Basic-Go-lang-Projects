@@ -9,10 +9,16 @@ import (
 
 var restroutes = Routes{
 	Route{
-		"user",
+		"getUser",
 		"GET",
 		"/v1/user/{userid}",
 		api.UserHandler,
+	},
+	Route{
+		"getEvent",
+		"GET",
+		"/v1/event/{eventid}",
+		api.EventHandler,
 	},
 }
 
