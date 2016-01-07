@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -206,6 +208,49 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonReply)
+}
+
+// JoinEvent : User joins an event
+func JoinEvent(w http.ResponseWriter, r *http.Request) {
+
+	var (
+		maxMem  string
+		currMem string
+	)
+
+	vars := mux.Vars(r)
+	eventid := vars["eventid"]
+
+	if eventid == "" {
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	dbconn := db.GetDBConn(DBName)
+	defer dbconn.Close()
+
+	err := dbconn.
+		QueryRow("SELECT max_mem, current_mem events WHERE id = $1", eventid).
+		Scan(maxMem, currMem)
+
+	if err != nil {
+		// If execution err occurs then throw error
+
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	intMaxMem, _ := strconv.ParseInt(maxMem, 10, 64)
+	intCurrMem, _ := strconv.ParseInt(currMem, 10, 64)
+
+	if intMaxMem == intCurrMem {
+		ThrowInternalErrAndExit(w)
+	}
+
+	// Update Row's current_mem
+	// Insert in redis
+	//return success
+
 }
 
 func getEnventsByRange(lat, long, radius float64) (*sql.Rows, error) {
