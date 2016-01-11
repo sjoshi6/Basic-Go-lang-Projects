@@ -28,6 +28,12 @@ var routes = Routes{
 		"/v1/search_events",
 		api.SearchEventsByRange,
 	},
+	Route{
+		"subscribe",
+		"POST",
+		"/v1/subscribe/{eventid}",
+		api.JoinEvent,
+	},
 }
 
 // SetBaseRoutes : Get an object of gorilla mux router

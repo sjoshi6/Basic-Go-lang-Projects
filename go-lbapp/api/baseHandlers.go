@@ -229,13 +229,17 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 	dbconn := db.GetDBConn(DBName)
 	defer dbconn.Close()
 
+	/*
+	   Before this confirm that user isnt in redis list of already subscribed
+	*/
+
 	err := dbconn.
-		QueryRow("SELECT max_mem, current_mem events WHERE id = $1", eventid).
-		Scan(maxMem, currMem)
+		QueryRow("SELECT max_mem, current_mem FROM Events WHERE id = $1", eventid).
+		Scan(&maxMem, &currMem)
 
 	if err != nil {
 		// If execution err occurs then throw error
-
+		log.Println(err)
 		ThrowForbiddenedAndExit(w)
 		return
 	}
@@ -244,12 +248,31 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 	intCurrMem, _ := strconv.ParseInt(currMem, 10, 64)
 
 	if intMaxMem == intCurrMem {
-		ThrowInternalErrAndExit(w)
+
+		// Adding more than maxMem is forbiddened
+		// This request should never be made by the app. Therefore Log data
+
+		log.Printf("Forbiddened: Called subscribe Event with maxMem %d and currentMem %d",
+			intMaxMem,
+			intCurrMem)
+
+		ThrowForbiddenedAndExit(w)
+		return
 	}
 
-	// Update Row's current_mem
-	// Insert in redis
+	// Update Row's current_mem if no issues before this
+	stmt, _ := dbconn.Prepare(`UPDATE Events SET current_mem=$1 WHERE id=$2;`)
+	_, execerr := stmt.Exec(intCurrMem+1, eventid)
+
+	if execerr != nil {
+		ThrowInternalErrAndExit(w)
+		return
+	}
+
+	/* Insert in redis */
+
 	//return success
+	RespondSuccessAndExit(w, "User subscribed to event successfully")
 
 }
 
