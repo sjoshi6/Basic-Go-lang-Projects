@@ -218,26 +218,52 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 		currMem string
 	)
 
+	// Collect the rest api variable value (eventid)
 	vars := mux.Vars(r)
 	eventid := vars["eventid"]
 
 	if eventid == "" {
+
+		// if event id is blank throw forbiddened
 		ThrowForbiddenedAndExit(w)
 		return
 	}
 
+	// JSON object in join request containing the userid
+	//----  Decode the object ----
+	var joineventreq generics.JoinRequest
+	decoder := json.NewDecoder(r.Body)
+
+	err := decoder.Decode(&joineventreq)
+	if err != nil {
+
+		// If error in decoding throw forbiddened request
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	// Check for duplicates
+	userpresent, err := db.RedisCheckDuplicateSubscribe(eventid, joineventreq.UserID)
+
+	if err != nil {
+		ThrowInternalErrAndExit(w)
+	}
+	if userpresent == true {
+
+		log.Printf("User %s was already in subsrcibed list for %s \n", joineventreq.UserID, eventid)
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	// --- Connect to sql and verify
 	dbconn := db.GetDBConn(DBName)
 	defer dbconn.Close()
 
-	/*
-	   Before this confirm that user isnt in redis list of already subscribed
-	*/
-
-	err := dbconn.
+	connerr := dbconn.
 		QueryRow("SELECT max_mem, current_mem FROM Events WHERE id = $1", eventid).
 		Scan(&maxMem, &currMem)
 
-	if err != nil {
+	if connerr != nil {
 		// If execution err occurs then throw error
 		log.Println(err)
 		ThrowForbiddenedAndExit(w)
@@ -249,9 +275,9 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 
 	if intMaxMem == intCurrMem {
 
-		// Adding more than maxMem is forbiddened
-		// This request should never be made by the app. Therefore Log data
-
+		/* Adding more than maxMem is forbiddened
+		   This request should never be made by the app. Therefore Log data
+		*/
 		log.Printf("Forbiddened: Called subscribe Event with maxMem %d and currentMem %d",
 			intMaxMem,
 			intCurrMem)
@@ -269,13 +295,23 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// --- End SQL tasks ---
+
 	/* Insert in redis */
+	rediserr := db.RedisInsertInSet(eventid, joineventreq.UserID)
+
+	if rediserr != nil {
+		// Throw internal err if userid is not inserted in redis list
+		ThrowInternalErrAndExit(w)
+		return
+	}
 
 	//return success
 	RespondSuccessAndExit(w, "User subscribed to event successfully")
 
 }
 
+// getEnventsByRange : get near by events by lat and long
 func getEnventsByRange(lat, long, radius float64) (*sql.Rows, error) {
 
 	selectStr := fmt.Sprintf("SELECT * FROM %v a", eventsTableName)
