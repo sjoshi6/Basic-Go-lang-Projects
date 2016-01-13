@@ -54,7 +54,7 @@ type SearchResults struct {
 	Events Events `json:"events"`
 }
 
-// JoinRequest : Join request for an event
-type JoinRequest struct {
+// UpdateSubscription : Join request for an event
+type UpdateSubscription struct {
 	UserID string `json:"userid"`
 }

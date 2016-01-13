@@ -231,7 +231,7 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 
 	// JSON object in join request containing the userid
 	//----  Decode the object ----
-	var joineventreq generics.JoinRequest
+	var joineventreq generics.UpdateSubscription
 	decoder := json.NewDecoder(r.Body)
 
 	err := decoder.Decode(&joineventreq)
@@ -308,6 +308,58 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 
 	//return success
 	RespondSuccessAndExit(w, "User subscribed to event successfully")
+
+}
+
+// LeaveEvent : Leave the event and unsubscribe
+func LeaveEvent(w http.ResponseWriter, r *http.Request) {
+
+	// Collect the rest api variable value (eventid)
+	vars := mux.Vars(r)
+	eventid := vars["eventid"]
+
+	if eventid == "" {
+
+		// if event id is blank throw forbiddened
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	//----  Decode the object ----
+	var leaveeventreq generics.UpdateSubscription
+	decoder := json.NewDecoder(r.Body)
+
+	err := decoder.Decode(&leaveeventreq)
+	if err != nil {
+
+		// If error in decoding throw forbiddened request
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	// --- Connect to sql and verify
+	dbconn := db.GetDBConn(DBName)
+	defer dbconn.Close()
+
+	// Update Row's current_mem if no issues before this
+	stmt, _ := dbconn.Prepare(`UPDATE Events SET current_mem=current_mem-1 WHERE id=$1;`)
+	_, execerr := stmt.Exec(eventid)
+
+	if execerr != nil {
+		ThrowInternalErrAndExit(w)
+		return
+	}
+
+	// Remove from redis set also
+	rediserr := db.RedisRemoveFromSet(eventid, leaveeventreq.UserID)
+
+	if rediserr != nil {
+		ThrowInternalErrAndExit(w)
+		return
+	}
+
+	// Send success otherwise
+	RespondSuccessAndExit(w, "Unsubscribed user from the Event")
 
 }
 

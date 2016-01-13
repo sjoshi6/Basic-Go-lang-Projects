@@ -73,6 +73,36 @@ func RedisInsertInSet(key string, val string) error {
 	return nil
 }
 
+// RedisRemoveFromSet : Insert a new User in Event List
+func RedisRemoveFromSet(key string, val string) error {
+
+	redisConn, connerr := GetRedisConn()
+
+	if connerr != nil {
+		return connerr
+	}
+
+	log.Printf("Attempting to remove user : %s to eventid : %s ", val, key)
+
+	reply, err := redisConn.Do("SREM", key, val)
+	if err != nil {
+
+		log.Println("Could not remove value from the list")
+		log.Println(err)
+
+		return err
+	}
+
+	if reply == nil {
+
+		// Dont throw error just log that second subscribe was sent by same user
+		log.Println("Err: User could not be removed.")
+		return nil
+	}
+
+	return nil
+}
+
 // RedisCheckDuplicateSubscribe : Confirms if the Subscriber isnt already present.
 func RedisCheckDuplicateSubscribe(key string, val string) (bool, error) {
 

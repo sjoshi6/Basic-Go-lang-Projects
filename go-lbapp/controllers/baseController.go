@@ -34,6 +34,12 @@ var routes = Routes{
 		"/v1/subscribe/{eventid}",
 		api.JoinEvent,
 	},
+	Route{
+		"unsubscribe",
+		"POST",
+		"/v1/unsubscribe/{eventid}",
+		api.LeaveEvent,
+	},
 }
 
 // SetBaseRoutes : Get an object of gorilla mux router
