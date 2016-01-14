@@ -103,8 +103,8 @@ func RedisRemoveFromSet(key string, val string) error {
 	return nil
 }
 
-// RedisCheckDuplicateSubscribe : Confirms if the Subscriber isnt already present.
-func RedisCheckDuplicateSubscribe(key string, val string) (bool, error) {
+// RedisCheckIsMember : Confirms if the Subscriber isnt already present.
+func RedisCheckIsMember(key string, val string) (bool, error) {
 
 	redisConn, connerr := GetRedisConn()
 

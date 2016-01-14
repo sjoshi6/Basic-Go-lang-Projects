@@ -182,6 +182,7 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 		// If execution err occurs then throw error
 		log.Fatal(execerr)
 		ThrowInternalErrAndExit(w)
+		return
 	}
 
 	// If no error then give a success response

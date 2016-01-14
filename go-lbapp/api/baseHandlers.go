@@ -245,7 +245,7 @@ func JoinEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check for duplicates
-	userpresent, err := db.RedisCheckDuplicateSubscribe(eventid, joineventreq.UserID)
+	userpresent, err := db.RedisCheckIsMember(eventid, joineventreq.UserID)
 
 	if err != nil {
 		ThrowInternalErrAndExit(w)
@@ -335,6 +335,19 @@ func LeaveEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		// If error in decoding throw forbiddened request
+		ThrowForbiddenedAndExit(w)
+		return
+	}
+
+	// Check for is a member
+	userpresent, err := db.RedisCheckIsMember(eventid, leaveeventreq.UserID)
+
+	if err != nil {
+		ThrowInternalErrAndExit(w)
+	}
+	if userpresent == false {
+
+		log.Printf("User %s was not present in list for %s \n", leaveeventreq.UserID, eventid)
 		ThrowForbiddenedAndExit(w)
 		return
 	}
