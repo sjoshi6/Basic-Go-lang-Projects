@@ -26,4 +26,5 @@ type Event struct {
 	Gender       string `json:"gender"`
 	MinAge       string `json:"min_age"`
 	MaxAge       string `json:"max_age"`
+	CurrentMem   string `json:"current_mem"`
 }

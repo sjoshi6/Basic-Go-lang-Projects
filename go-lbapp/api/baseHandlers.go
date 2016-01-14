@@ -137,6 +137,7 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 		endtime      time.Time
 		maxMem       int64
 		minMem       int64
+		currentMem   int64
 		friendOnly   bool
 		gender       string
 		minAge       int64
@@ -168,7 +169,7 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 	for events.Next() {
 		err := events.Scan(&id, &eventname, &lat, &long,
 			&creationtime, &creatorid, &starttime, &endtime, &maxMem, &minMem,
-			&friendOnly, &gender, &minAge, &maxAge)
+			&friendOnly, &gender, &minAge, &maxAge, &currentMem)
 
 		if err != nil {
 			log.Fatal(err)
@@ -190,6 +191,7 @@ func SearchEventsByRange(w http.ResponseWriter, r *http.Request) {
 			gender,
 			strconv.FormatInt(minAge, 10),
 			strconv.FormatInt(maxAge, 10),
+			strconv.FormatInt(currentMem, 10),
 		}
 
 		returnEvents = append(returnEvents, event)

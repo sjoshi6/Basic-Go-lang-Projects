@@ -74,6 +74,7 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 		maxAge       int64
 		lat          float64
 		long         float64
+		currentMem   int64
 	)
 
 	// Extract API resource ID
@@ -90,10 +91,10 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 	defer dbconn.Close()
 
 	err := dbconn.
-		QueryRow("SELECT id, event_name, lat, lng, creation_time, creator_id, start_time, end_time, max_mem, min_mem, friend_only, gender, min_age, max_age FROM Events WHERE id = $1", eventid).
+		QueryRow("SELECT id, event_name, lat, lng, creation_time, creator_id, start_time, end_time, max_mem, min_mem, friend_only, gender, min_age, max_age, current_mem FROM Events WHERE id = $1", eventid).
 		Scan(&id, &eventname, &lat, &long,
 		&creationtime, &creatorid, &starttime, &endtime, &maxMem, &minMem,
-		&friendOnly, &gender, &minAge, &maxAge)
+		&friendOnly, &gender, &minAge, &maxAge, &currentMem)
 
 	if err != nil {
 		// If execution err occurs then throw error
@@ -118,6 +119,7 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 		gender,
 		strconv.FormatInt(minAge, 10),
 		strconv.FormatInt(maxAge, 10),
+		strconv.FormatInt(currentMem, 10),
 	}
 
 	jsonResponse, err := json.Marshal(event)
