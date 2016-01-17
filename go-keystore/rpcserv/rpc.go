@@ -1,6 +1,7 @@
 package rpcserv
 
 import (
+	"go-keystore/database/postgres"
 	"go-keystore/model"
 	"sync"
 )
@@ -25,10 +26,12 @@ func (t *RPC) Get(key string, keypair *model.KeyPair) error {
 	t.Mu.RLock()
 	defer t.Mu.RUnlock()
 
+	value, _ := db.GetJSONFromLocalNode(key)
+
 	// Set the incoming second params value to a new KeyPair object with value from the DB
 	*keypair = model.KeyPair{
 		Key:   key,
-		Value: "test",
+		Value: string(value),
 	}
 
 	// Increment the number of get requests to the rpc obj

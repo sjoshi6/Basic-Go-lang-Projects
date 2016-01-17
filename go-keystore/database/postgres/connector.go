@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"go-keystore/config"
 	"log"
@@ -39,6 +40,8 @@ func CreateDBIfNotExists() error {
 // CreateTableIfNotExists : Create table if not exist
 func CreateTableIfNotExists() error {
 
+	log.Println("Validating the presence of keypair table on storage node...")
+
 	// Create DB conn
 	db, err := GetDBConn()
 	if err != nil {
@@ -58,6 +61,7 @@ func CreateTableIfNotExists() error {
 	}
 
 	log.Println(result)
+	log.Println("Database and table keypair is ready as required.")
 
 	return nil
 }
@@ -73,4 +77,27 @@ func GetDBConn() (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+// GetJSONFromLocalNode : JSON for value
+func GetJSONFromLocalNode(key string) ([]byte, error) {
+
+	var value json.RawMessage
+
+	log.Printf("Get value for %s \n", key)
+
+	// Create DB conn
+	db, err := GetDBConn()
+	if err != nil {
+		log.Println("Error Connecting to DB")
+		return nil, err
+	}
+
+	// Defer db close
+	defer db.Close()
+
+	db.QueryRow("SELECT * FROM KeyPair where key=$1", key).Scan(&key, &value)
+
+	return value, nil
+
 }
