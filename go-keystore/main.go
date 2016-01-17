@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-keystore/database/mysql"
 	"go-keystore/rpcserv"
 	"log"
 	"os"
@@ -22,6 +23,12 @@ func main() {
 	switch args[0] {
 
 	case "server":
+
+		err := db.CreateTableIfNotExists()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		rpcserv.StartRPCServer()
 
 	case "client":
