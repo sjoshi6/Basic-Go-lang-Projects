@@ -79,8 +79,8 @@ func GetDBConn() (*sql.DB, error) {
 	return db, nil
 }
 
-// GetJSONFromLocalNode : JSON for value
-func GetJSONFromLocalNode(key string) ([]byte, error) {
+// GetFromLocalNode : JSON for value
+func GetFromLocalNode(key string) ([]byte, error) {
 
 	var value json.RawMessage
 
@@ -100,4 +100,36 @@ func GetJSONFromLocalNode(key string) ([]byte, error) {
 
 	return value, nil
 
+}
+
+// InsertIntoLocalNode : Insert a JSON into postgres
+func InsertIntoLocalNode(key string, value string) error {
+
+	// Create DB conn
+	db, err := GetDBConn()
+	if err != nil {
+		log.Println("Error Connecting to DB")
+		return err
+	}
+
+	// Defer db close
+	defer db.Close()
+
+	/*
+			   Creating a very naive delete and insert implementation.
+		       Later improve it with versioning of objects
+	*/
+
+	db.Exec("DELETE FROM KeyPair WHERE key=$1", key)
+	_, inserterr := db.Exec("INSERT INTO KeyPair VALUES($1, $2);", key, value)
+
+	if inserterr != nil {
+
+		log.Println("Error in insert operation")
+		log.Println(inserterr)
+
+		return inserterr
+	}
+
+	return nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-keystore/database/postgres"
+	"go-keystore/model"
 	"go-keystore/rpcserv"
 	"log"
 	"os"
@@ -42,7 +43,20 @@ func main() {
 
 // testRPCClient : Test if RPC connections work
 func testRPCClient(hostname string) {
+
 	r, _ := rpcserv.NewClient(hostname)
+
+	// Test for Get
 	pair, _ := r.Get("aa")
 	fmt.Printf("Key : %s has Value : %s \n", pair.Key, pair.Value)
+
+	// Test for Put
+	keypair := &model.KeyPair{
+		Key:   "qq",
+		Value: "{\"qq\":\"saurabh\"}",
+	}
+
+	success, _ := r.Put(keypair)
+	fmt.Println(success)
+
 }

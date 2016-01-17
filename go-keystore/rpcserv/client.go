@@ -43,3 +43,17 @@ func (c *Client) Get(key string) (*model.KeyPair, error) {
 
 	return keypair, nil
 }
+
+// Put : A Put call client wrapper
+func (c *Client) Put(keypair *model.KeyPair) (bool, error) {
+
+	var success bool
+	// Call the Get function and
+	err := c.connection.Call("RPC.Put", &keypair, &success)
+
+	if err != nil {
+		return false, err
+	}
+
+	return success, nil
+}
