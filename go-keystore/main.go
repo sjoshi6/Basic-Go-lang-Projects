@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go-keystore/database/mysql"
+	"go-keystore/database/postgres"
 	"go-keystore/rpcserv"
 	"log"
 	"os"

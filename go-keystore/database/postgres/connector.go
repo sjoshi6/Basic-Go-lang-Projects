@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"go-keystore/config"
 	"log"
+
+	// Used for connecting to postgres server
+	_ "github.com/lib/pq"
 )
 
 // CreateDBIfNotExists : Create DB if not present
@@ -36,9 +39,6 @@ func CreateDBIfNotExists() error {
 // CreateTableIfNotExists : Create table if not exist
 func CreateTableIfNotExists() error {
 
-	// Always call to ensure DB exists
-	CreateDBIfNotExists()
-
 	// Create DB conn
 	db, err := GetDBConn()
 	if err != nil {
@@ -51,7 +51,7 @@ func CreateTableIfNotExists() error {
 
 	// Creating the table
 	result, err := db.Exec(
-		"CREATE TABLE IF NOT EXISTS KeyPair ( key VARCHAR(200) PRIMARY KEY, value BLOB NOT NULL")
+		"CREATE TABLE IF NOT EXISTS KeyPair ( key VARCHAR(200) PRIMARY KEY, value JSON NOT NULL);")
 
 	if err != nil {
 		return err
@@ -65,8 +65,8 @@ func CreateTableIfNotExists() error {
 // GetDBConn : conn object for DB - Make sure function closes it
 func GetDBConn() (*sql.DB, error) {
 
-	dbconnStr := fmt.Sprintf("root:root@tcp(%s:%s)/%s/?charset=utf8", settings.DBHostName, settings.DBPort, settings.DBName)
-	db, err := sql.Open("mysql", dbconnStr)
+	dbconnStr := fmt.Sprintf("dbname=%s sslmode=disable", settings.DBName)
+	db, err := sql.Open("postgres", dbconnStr)
 
 	if err != nil {
 		return nil, err
