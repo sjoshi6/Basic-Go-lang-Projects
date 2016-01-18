@@ -70,7 +70,7 @@ func testRPCClient(hostname string) {
 	fmt.Println(success)
 
 	fmt.Println("Insert Mock Complete")
-	fmt.Println("Beginning delete op..")
+	fmt.Println("Beginning delete op...")
 
 	success, _ = r.Delete("test")
 	fmt.Println(success)
