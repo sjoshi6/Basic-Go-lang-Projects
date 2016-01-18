@@ -68,3 +68,25 @@ func (t *RPC) Put(keypair *model.KeyPair, success *bool) error {
 	*success = true
 	return nil
 }
+
+// Delete : Used to delete a keypair from storagenode
+func (t *RPC) Delete(key string, success *bool) error {
+
+	// Receive a WR lock
+	t.Mu.Lock()
+	defer t.Mu.Unlock()
+
+	// Increment requests counter
+	t.Requests.Delete++
+
+	err := db.DeleteFromLocalNode(key)
+	if err != nil {
+		*success = false
+		return err
+	}
+
+	// Set the addressed object to true
+	*success = true
+
+	return nil
+}

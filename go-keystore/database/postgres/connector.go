@@ -133,3 +133,26 @@ func InsertIntoLocalNode(key string, value string) error {
 
 	return nil
 }
+
+// DeleteFromLocalNode : Delete a key from Local Node
+func DeleteFromLocalNode(key string) error {
+
+	// Create DB conn
+	db, err := GetDBConn()
+	if err != nil {
+
+		log.Println("Error Connecting to DB")
+		return err
+	}
+
+	// Defer db close
+	defer db.Close()
+
+	_, deleteerr := db.Exec("DELETE FROM KeyPair WHERE key=$1", key)
+	if deleteerr != nil {
+
+		return deleteerr
+	}
+
+	return nil
+}

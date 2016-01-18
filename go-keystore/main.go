@@ -59,4 +59,20 @@ func testRPCClient(hostname string) {
 	success, _ := r.Put(keypair)
 	fmt.Println(success)
 
+	// Test for Delete
+	fmt.Println("Beginning test for delete.. Creating mock")
+	keypair = &model.KeyPair{
+		Key:   "test",
+		Value: "{\"test\":\"saurabh\"}",
+	}
+
+	success, _ = r.Put(keypair)
+	fmt.Println(success)
+
+	fmt.Println("Insert Mock Complete")
+	fmt.Println("Beginning delete op..")
+
+	success, _ = r.Delete("test")
+	fmt.Println(success)
+
 }

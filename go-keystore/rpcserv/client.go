@@ -57,3 +57,15 @@ func (c *Client) Put(keypair *model.KeyPair) (bool, error) {
 
 	return success, nil
 }
+
+// Delete : A Delete call wrapper for client
+func (c *Client) Delete(key string) (bool, error) {
+
+	var success bool
+	err := c.connection.Call("RPC.Delete", key, &success)
+
+	if err != nil {
+		return false, err
+	}
+	return success, nil
+}
