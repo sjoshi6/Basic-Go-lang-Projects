@@ -1,4 +1,4 @@
-package rpcserv
+package client
 
 import (
 	"go-keystore/config"

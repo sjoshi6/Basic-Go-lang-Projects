@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"go-keystore/client"
 	"go-keystore/database/postgres"
 	"go-keystore/model"
-	"go-keystore/rpcserv"
+	"go-keystore/server"
 	"log"
 	"os"
 	"runtime"
@@ -30,7 +31,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		rpcserv.StartRPCServer()
+		server.StartRPCServer()
 
 	case "client":
 		testRPCClient("localhost")
@@ -44,7 +45,7 @@ func main() {
 // testRPCClient : Test if RPC connections work
 func testRPCClient(hostname string) {
 
-	r, _ := rpcserv.NewClient(hostname)
+	r, _ := client.NewClient(hostname)
 
 	// Test for Get
 	pair, _ := r.Get("aa")

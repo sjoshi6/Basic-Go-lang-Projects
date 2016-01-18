@@ -1,7 +1,8 @@
-package rpcserv
+package server
 
 import (
 	"go-keystore/config"
+	"go-keystore/rpc"
 	"log"
 	"net"
 	"net/rpc"
@@ -11,7 +12,7 @@ import (
 func StartRPCServer() {
 
 	// Get a new obj from factory & register it as an rpcObject
-	rpcObj := NewRPC()
+	rpcObj := rpcserv.NewRPC()
 	rpc.Register(rpcObj)
 
 	// Start a tcp connection to allow execution of rpc
