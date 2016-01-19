@@ -11,34 +11,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// CreateDBIfNotExists : Create DB if not present
-func CreateDBIfNotExists() error {
-
-	// Connect to DB without dbname
-	dbConnStr := fmt.Sprintf("root:root@tcp(%s:%s)?charset=utf8", settings.DBHostName, settings.DBPort)
-
-	db, err := sql.Open("mysql", dbConnStr)
-	defer db.Close()
-
-	if err != nil {
-		log.Println("Failed to create the DB")
-		log.Println(err)
-		return err
-	}
-
-	result, err := db.Exec("CREATE DATABASE IF NOT EXISTS $1", settings.DBName)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	log.Println(result)
-
-	return nil
-}
-
-// CreateTableIfNotExists : Create table if not exist
-func CreateTableIfNotExists() error {
+// CreateStorageTableIfNotExists : Create table if not exist
+func CreateStorageTableIfNotExists() error {
 
 	log.Println("Validating the presence of keypair table on storage node...")
 
@@ -62,6 +36,37 @@ func CreateTableIfNotExists() error {
 
 	log.Println(result)
 	log.Println("Database and table keypair is ready as required.")
+
+	return nil
+}
+
+// CreateIndexTableIfNotExists : Creates an index table if not present
+func CreateIndexTableIfNotExists() error {
+
+	log.Println("Validating the presence of index table on manager node...")
+
+	// Create DB conn
+	db, err := GetDBConn()
+	if err != nil {
+		log.Println("Error Connecting to DB")
+		log.Println(err)
+		return err
+	}
+
+	// Defer db close
+	defer db.Close()
+
+	// Creating the table
+	result, err := db.Exec(
+		"CREATE TABLE IF NOT EXISTS ManagerIndex (id SERIAL PRIMARY KEY, IPAddress VARCHAR(20) NOT NULL);")
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	log.Println(result)
+	log.Println("Table index is ready as required.")
 
 	return nil
 }

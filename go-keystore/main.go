@@ -27,7 +27,7 @@ func main() {
 
 	case "server":
 
-		err := db.CreateTableIfNotExists()
+		err := db.CreateStorageTableIfNotExists()
 		if err != nil {
 			log.Fatal(err)
 		}
