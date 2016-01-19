@@ -19,5 +19,14 @@ postgres -D db_lbapp
 createdb storagenode
 ```
 
+### Register a new node with loadbalancer redis
+```
+curl -X POST -d '{"ip_address": "192.186.177.112"}' http://localhost:8000/v1/register
+```
+
+### Request for the next node's IP ready to serve request
+```
+curl -X GET http://localhost:8000/v1/nextNode
+```
 
 
