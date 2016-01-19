@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-keystore/client"
 	"go-keystore/database/postgres"
+	"go-keystore/loadbalancer"
 	"go-keystore/model"
 	"go-keystore/server"
 	"log"
@@ -35,6 +36,11 @@ func main() {
 
 	case "client":
 		testRPCClient("localhost")
+
+	case "loadbalancer":
+
+		log.Println("Starting Load Balancer...")
+		loadbalancer.StartLoadBalancer()
 
 	default:
 		log.Fatal("Incorrect choice of command line parameter")
